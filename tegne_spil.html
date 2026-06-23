@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Tegne-spil 🎨</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+/* TOP BAR */
+.topbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px 8px;
+  flex-shrink: 0;
+}
+.title {
+  font-family: 'Fredoka One', cursive; font-size: 1.2rem;
+  color: var(--dark); flex: 1; text-align: center;
+}
+
+/* CARD AREA */
+.card-area {
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px; padding: 6px 12px;
+  flex-shrink: 0;
+}
+
+/* The secret card */
+.secret-card {
+  position: relative; width: 72px; height: 72px;
+  border-radius: 16px; border: 3px solid var(--dark);
+  box-shadow: 3px 3px 0 var(--dark);
+  cursor: pointer; flex-shrink: 0;
+  touch-action: manipulation;
+  overflow: hidden;
+}
+.card-back {
+  position: absolute; inset: 0; background: var(--sea);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; transition: opacity 0.2s;
+  border-radius: 13px;
+}
+.card-front {
+  position: absolute; inset: 0; background: var(--sun);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 2.4rem; opacity: 0; transition: opacity 0.2s;
+  border-radius: 13px;
+}
+.secret-card.peeking .card-back { opacity: 0; }
+.secret-card.peeking .card-front { opacity: 1; }
+.secret-card.empty .card-back { background: #ccc; }
+
+.peek-hint {
+  font-size: 0.7rem; font-weight: 800; color: var(--sea);
+  text-align: center; flex-shrink: 0; line-height: 1.3;
+  max-width: 60px;
+}
+
+/* TOOL BUTTONS */
+.tools {
+  display: flex; align-items: center; gap: 6px;
+  flex: 1; justify-content: flex-end;
+}
+
+.tool-btn {
+  width: 42px; height: 42px; border-radius: 12px;
+  border: 2px solid var(--dark); background: white;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; cursor: pointer; flex-shrink: 0;
+  touch-action: manipulation; box-shadow: 2px 2px 0 var(--dark);
+}
+.tool-btn:active { transform: scale(0.9); }
+.tool-btn.active { background: var(--sun); }
+
+/* COLOR PICKER ROW */
+.color-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 12px 6px; flex-shrink: 0;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.color-row::-webkit-scrollbar { display: none; }
+
+.color-dot {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 3px solid transparent; flex-shrink: 0;
+  cursor: pointer; touch-action: manipulation;
+  transition: transform 0.1s;
+}
+.color-dot.active { border-color: var(--dark); transform: scale(1.2); }
+.color-dot:active { transform: scale(1.1); }
+
+.size-slider {
+  -webkit-appearance: none; appearance: none;
+  height: 6px; border-radius: 3px; background: #ccc;
+  flex: 1; min-width: 60px; max-width: 100px;
+  outline: none; cursor: pointer;
+}
+.size-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 22px; height: 22px;
+  border-radius: 50%; background: var(--dark); cursor: pointer;
+}
+
+/* CANVAS */
+.canvas-wrap {
+  flex: 1; position: relative; margin: 0 12px 8px;
+  border-radius: 20px; overflow: hidden;
+  border: 3px solid var(--dark); box-shadow: 4px 4px 0 var(--dark);
+  background: white;
+  min-height: 0;
+}
+canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  touch-action: none;
+  display: block;
+}
+
+/* BOTTOM BAR */
+.bottombar {
+  display: flex; gap: 8px; padding: 6px 12px 16px; flex-shrink: 0;
+}
+.bottom-btn {
+  flex: 1; padding: 14px 8px; border-radius: 16px;
+  border: 3px solid var(--dark); font-family: 'Fredoka One', cursive;
+  font-size: 1rem; cursor: pointer; box-shadow: 3px 3px 0 var(--dark);
+  touch-action: manipulation;
+}
+.bottom-btn:active { transform: scale(0.96); box-shadow: 1px 1px 0 var(--dark); }
+.btn-draw { background: var(--green); color: white; border-color: #2d6e4a; box-shadow: 3px 3px 0 #2d6e4a; }
+.btn-clear { background: white; color: var(--coral); border-color: var(--coral); box-shadow: 3px 3px 0 var(--coral); }
+.btn-next { background: var(--sun); color: var(--dark); }
+
+/* DRAW CARD SCREEN */
+.draw-screen {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 50; display: none;
+}
+.draw-screen.show { display: flex; }
+.draw-card-modal {
+  background: white; border-radius: 28px; border: 4px solid var(--dark);
+  box-shadow: 6px 6px 0 var(--dark);
+  padding: 32px 24px; text-align: center; max-width: 340px; width: 88%;
+}
+.draw-card-modal h2 {
+  font-family: 'Fredoka One', cursive; font-size: 1.4rem; margin-bottom: 8px;
+}
+.draw-card-modal p { font-size: 0.9rem; color: var(--sea); font-weight: 700; margin-bottom: 24px; }
+.card-stack {
+  position: relative; width: 140px; height: 140px; margin: 0 auto 24px;
+}
+.stack-card {
+  position: absolute; width: 120px; height: 120px;
+  background: var(--sea); border-radius: 20px;
+  border: 3px solid var(--dark); box-shadow: 3px 3px 0 var(--dark);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.5rem;
+}
+.stack-card:nth-child(1) { top: 20px; left: 20px; transform: rotate(-6deg); opacity: 0.5; }
+.stack-card:nth-child(2) { top: 10px; left: 10px; transform: rotate(-2deg); opacity: 0.75; }
+.stack-card:nth-child(3) { top: 0; left: 0; transform: rotate(2deg); }
+
+.pull-btn {
+  width: 100%; padding: 18px; border-radius: 18px;
+  border: 4px solid var(--dark); background: var(--sun);
+  font-family: 'Fredoka One', cursive; font-size: 1.3rem;
+  cursor: pointer; box-shadow: 4px 4px 0 var(--dark);
+  touch-action: manipulation;
+}
+.pull-btn:active { transform: scale(0.95); }
+
+/* REVEALED card */
+.revealed-screen {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  display: none; align-items: center; justify-content: center;
+  z-index: 60; flex-direction: column; gap: 20px;
+}
+.revealed-screen.show { display: flex; }
+.big-card {
+  background: var(--sun); border-radius: 28px; border: 5px solid var(--dark);
+  box-shadow: 6px 6px 0 var(--dark);
+  padding: 36px 32px; text-align: center;
+}
+.big-card .big-emoji { font-size: 7rem; line-height: 1; display: block; animation: bob 1s ease-in-out infinite; }
+.big-card p { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: var(--dark); margin-top: 12px; }
+.start-drawing-btn {
+  padding: 18px 36px; border-radius: 20px; border: 4px solid white;
+  background: var(--green); color: white;
+  font-family: 'Fredoka One', cursive; font-size: 1.3rem;
+  cursor: pointer; box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+  touch-action: manipulation;
+}
+.start-drawing-btn:active { transform: scale(0.95); }
+
+/* DONE screen */
+.done-screen {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+  display: none; align-items: center; justify-content: center; z-index: 70;
+}
+.done-screen.show { display: flex; }
+.done-modal {
+  background: white; border-radius: 28px; border: 4px solid var(--dark);
+  padding: 28px 24px; text-align: center; max-width: 320px; width: 88%;
+  font-family: 'Fredoka One', cursive;
+}
+.done-modal h2 { font-size: 1.6rem; margin-bottom: 8px; }
+.done-modal p { font-size: 0.95rem; font-family: 'Nunito', sans-serif; font-weight: 700; color: var(--sea); margin-bottom: 20px; }
+.done-btn-row { display: flex; flex-direction: column; gap: 10px; }
+.done-btn {
+  padding: 16px; border-radius: 16px; border: 3px solid var(--dark);
+  font-family: 'Fredoka One', cursive; font-size: 1.1rem;
+  cursor: pointer; box-shadow: 3px 3px 0 var(--dark); touch-action: manipulation;
+}
+.done-btn.again { background: var(--sun); }
+.done-btn.restart { background: var(--sea); color: white; border-color: var(--deep); box-shadow: 3px 3px 0 var(--deep); }
+.done-btn:active { transform: scale(0.95); }
+
+.cards-left {
+  font-size: 0.75rem; font-weight: 800; color: var(--sea);
+  text-align: center; padding: 0 0 2px;
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <a href="index.html" class="back-btn">← Hjem</a>
+  <div class="title">🎨 Tegne-spil</div>
+  <div class="tools">
+    <div class="tool-btn active" id="pen-btn" onclick="setTool('pen')" title="Pen">✏️</div>
+    <div class="tool-btn" id="eraser-btn" onclick="setTool('eraser')" title="Viskelæder">🧹</div>
+  </div>
+</div>
+
+<!-- CARD + PEEK AREA -->
+<div class="card-area">
+  <div class="secret-card" id="secret-card" onpointerdown="startPeek()" onpointerup="stopPeek()" onpointerleave="stopPeek()">
+    <div class="card-back">🂠</div>
+    <div class="card-front" id="card-front-emoji"></div>
+  </div>
+  <div class="peek-hint">Hold nede<br>for at kigge 👆</div>
+  <div style="flex:1"></div>
+  <div class="cards-left" id="cards-left"></div>
+</div>
+
+<!-- COLOR ROW -->
+<div class="color-row" id="color-row"></div>
+
+<!-- CANVAS -->
+<div class="canvas-wrap" id="canvas-wrap">
+  <canvas id="draw-canvas"></canvas>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottombar">
+  <button class="bottom-btn btn-clear" onclick="clearCanvas()">🧹 Ryd</button>
+  <button class="bottom-btn btn-next" onclick="showDone()">✅ Gættet!</button>
+  <button class="bottom-btn btn-draw" onclick="openDrawCard()">🃏 Nyt kort</button>
+</div>
+
+<!-- DRAW CARD SCREEN -->
+<div class="draw-screen" id="draw-screen">
+  <div class="draw-card-modal">
+    <h2>Træk et kort!</h2>
+    <p>Husk: ingen må se hvad du trækker!</p>
+    <div class="card-stack">
+      <div class="stack-card">🂠</div>
+      <div class="stack-card">🂠</div>
+      <div class="stack-card" id="stack-top">🂠</div>
+    </div>
+    <button class="pull-btn" onclick="pullCard()">🤫 Træk et hemmeligt kort!</button>
+  </div>
+</div>
+
+<!-- REVEALED SCREEN -->
+<div class="revealed-screen" id="revealed-screen">
+  <div class="big-card">
+    <span class="big-emoji" id="revealed-emoji"></span>
+    <p>Husk det godt — og tegn det!</p>
+  </div>
+  <button class="start-drawing-btn" onclick="startDrawing()">✏️ Tegn nu!</button>
+</div>
+
+<!-- DONE SCREEN -->
+<div class="done-screen" id="done-screen">
+  <div class="done-modal">
+    <h2>🎉 Gættet!</h2>
+    <p>Det var: <span id="done-emoji" style="font-size:1.5rem"></span></p>
+    <div class="done-btn-row">
+      <button class="done-btn again" onclick="nextRound()">➡️ Næste spiller!</button>
+      <button class="done-btn restart" onclick="restartGame()">🔄 Start helt forfra</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CARDS ──────────────────────────────────────────────
+const ALL_CARDS = [
+  // Bornholm-ting
+  '🚢','⛪','🪨','🌊','🦅','🚲','🍦','🐚','⛵','🌅',
+  '🐟','🏖️','🌲','🐄','💨',
+  // Dyr
+  '🐘','🦁','🐬','🦒','🐧','🦊','🐙','🦋','🐊','🦓',
+  '🐼','🦅','🐢','🐸','🦩',
+  // Ting/mad
+  '🍕','🍎','🚗','✈️','🏠','⭐','🌈','🎂','👑','🎸',
+  '🌻','🍉','🎠','🚀','⚽',
+  // Natur
+  '🌸','🍄','🌙','☀️','❄️','🌋','🏔️','🌴','🌵','🍀',
+];
+
+let deck = [];
+let currentCard = null;
+let usedCards = [];
+
+function shuffleDeck() {
+  deck = [...ALL_CARDS].sort(() => Math.random() - 0.5);
+  usedCards = [];
+}
+
+function updateCardsLeft() {
+  const el = document.getElementById('cards-left');
+  el.textContent = deck.length > 0 ? `${deck.length} kort tilbage` : 'Ingen kort tilbage!';
+}
+
+// ── CANVAS ─────────────────────────────────────────────
+const canvas = document.getElementById('draw-canvas');
+const ctx = canvas.getContext('2d');
+let drawing = false;
+let lastX = 0, lastY = 0;
+let tool = 'pen';
+let penColor = '#1A2E4A';
+let penSize = 5;
+
+const COLORS = [
+  '#1A2E4A','#E53935','#1E88E5','#43A047','#FDD835',
+  '#FB8C00','#8E24AA','#F48FB1','#00ACC1','#ffffff',
+  '#6D4C41','#FF6B6B',
+];
+
+function buildColorRow() {
+  const row = document.getElementById('color-row');
+  COLORS.forEach(c => {
+    const dot = document.createElement('div');
+    dot.className = 'color-dot' + (c === penColor ? ' active' : '');
+    dot.style.background = c;
+    if (c === '#ffffff') dot.style.border = '3px solid #ccc';
+    dot.onclick = () => {
+      penColor = c; tool = 'pen';
+      document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+      dot.classList.add('active');
+      setTool('pen');
+    };
+    row.appendChild(dot);
+  });
+
+  // Size slider
+  const slider = document.createElement('input');
+  slider.type = 'range'; slider.min = 2; slider.max = 30; slider.value = penSize;
+  slider.className = 'size-slider';
+  slider.oninput = () => { penSize = parseInt(slider.value); };
+  row.appendChild(slider);
+}
+
+function resizeCanvas() {
+  const wrap = document.getElementById('canvas-wrap');
+  const rect = wrap.getBoundingClientRect();
+  // Save current drawing
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  canvas.width = rect.width;
+  canvas.height = rect.height;
+  ctx.putImageData(imageData, 0, 0);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+}
+
+function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const src = e.touches ? e.touches[0] : e;
+  return [src.clientX - rect.left, src.clientY - rect.top];
+}
+
+function startDraw(e) {
+  e.preventDefault();
+  drawing = true;
+  [lastX, lastY] = getPos(e);
+  // Draw a dot
+  ctx.beginPath();
+  ctx.arc(lastX, lastY, (tool === 'eraser' ? penSize * 3 : penSize) / 2, 0, Math.PI * 2);
+  ctx.fillStyle = tool === 'eraser' ? '#ffffff' : penColor;
+  ctx.fill();
+}
+
+function draw(e) {
+  e.preventDefault();
+  if (!drawing) return;
+  const [x, y] = getPos(e);
+  ctx.beginPath();
+  ctx.moveTo(lastX, lastY);
+  ctx.lineTo(x, y);
+  ctx.strokeStyle = tool === 'eraser' ? '#ffffff' : penColor;
+  ctx.lineWidth = tool === 'eraser' ? penSize * 3 : penSize;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+  [lastX, lastY] = [x, y];
+}
+
+function stopDraw(e) { e.preventDefault(); drawing = false; }
+
+canvas.addEventListener('pointerdown', startDraw, { passive: false });
+canvas.addEventListener('pointermove', draw, { passive: false });
+canvas.addEventListener('pointerup', stopDraw, { passive: false });
+canvas.addEventListener('pointerleave', stopDraw, { passive: false });
+
+function setTool(t) {
+  tool = t;
+  document.getElementById('pen-btn').classList.toggle('active', t === 'pen');
+  document.getElementById('eraser-btn').classList.toggle('active', t === 'eraser');
+}
+
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// ── CARD FLOW ──────────────────────────────────────────
+function openDrawCard() {
+  document.getElementById('draw-screen').classList.add('show');
+  updateCardsLeft();
+}
+
+function pullCard() {
+  if (deck.length === 0) {
+    alert('Ingen flere kort! Starter forfra 🔄');
+    shuffleDeck();
+    updateCardsLeft();
+  }
+  currentCard = deck.pop();
+  usedCards.push(currentCard);
+
+  // Show revealed screen
+  document.getElementById('draw-screen').classList.remove('show');
+  document.getElementById('revealed-emoji').textContent = currentCard;
+  document.getElementById('revealed-screen').classList.add('show');
+  updateCardsLeft();
+}
+
+function startDrawing() {
+  document.getElementById('revealed-screen').classList.remove('show');
+  // Update secret card
+  document.getElementById('card-front-emoji').textContent = currentCard;
+  document.getElementById('secret-card').classList.remove('empty');
+  // Clear canvas for new round
+  clearCanvas();
+}
+
+function startPeek() {
+  if (!currentCard) return;
+  document.getElementById('secret-card').classList.add('peeking');
+}
+function stopPeek() {
+  document.getElementById('secret-card').classList.remove('peeking');
+}
+
+function showDone() {
+  if (!currentCard) { openDrawCard(); return; }
+  document.getElementById('done-emoji').textContent = currentCard;
+  document.getElementById('done-screen').classList.add('show');
+}
+
+function nextRound() {
+  document.getElementById('done-screen').classList.remove('show');
+  clearCanvas();
+  openDrawCard();
+}
+
+function restartGame() {
+  document.getElementById('done-screen').classList.remove('show');
+  shuffleDeck();
+  currentCard = null;
+  document.getElementById('card-front-emoji').textContent = '';
+  document.getElementById('secret-card').classList.add('empty');
+  clearCanvas();
+  updateCardsLeft();
+  openDrawCard();
+}
+
+// ── INIT ───────────────────────────────────────────────
+buildColorRow();
+shuffleDeck();
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// Start by showing draw card screen
+setTimeout(() => openDrawCard(), 300);
+</script>
+</body>
+</html>

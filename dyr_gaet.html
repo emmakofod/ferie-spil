@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Gæt dyret! 🐘</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.animal-card {
+  background: var(--white); border: 4px solid var(--dark);
+  border-radius: 28px; box-shadow: 5px 5px 0 var(--dark);
+  text-align: center; padding: 36px 24px 28px;
+  max-width: 400px; margin: 0 auto 20px;
+}
+.animal-emoji {
+  font-size: 8rem; line-height: 1; display: block;
+  animation: bob 1.5s ease-in-out infinite;
+}
+.animal-name {
+  font-family: 'Fredoka One', cursive; font-size: 2.4rem;
+  margin-top: 14px; color: var(--dark);
+}
+.hint-list {
+  margin-top: 14px; text-align: left;
+  font-size: 0.92rem; font-weight: 700; color: var(--sea);
+  display: none;
+}
+.hint-list li { margin: 6px 0; list-style: none; padding-left: 22px; position: relative; }
+.hint-list li::before { content: '👉'; position: absolute; left: 0; font-size: 0.8rem; top: 1px; }
+
+.hint-btn {
+  display: block; width: 100%; max-width: 400px; margin: 0 auto 12px;
+  padding: 14px; border-radius: 14px; border: 3px solid var(--sea);
+  background: var(--white); color: var(--sea);
+  font-family: 'Fredoka One', cursive; font-size: 1rem; cursor: pointer;
+  touch-action: manipulation;
+}
+.hint-btn:active { background: var(--sea); color: white; }
+
+.action-row {
+  display: flex; gap: 10px; max-width: 400px; margin: 0 auto 16px;
+}
+.action-btn {
+  flex: 1; padding: 18px 8px; border-radius: 18px; border: 3px solid var(--dark);
+  font-family: 'Fredoka One', cursive; font-size: 1.05rem; cursor: pointer;
+  box-shadow: 3px 3px 0 var(--dark); touch-action: manipulation;
+}
+.action-btn.next { background: var(--green); color: white; border-color: #2d6e4a; box-shadow: 3px 3px 0 #2d6e4a; }
+.action-btn.skip { background: var(--white); color: var(--coral); border-color: var(--coral); box-shadow: 3px 3px 0 var(--coral); }
+.action-btn:active { transform: scale(0.95); }
+
+.score-display {
+  background: var(--sun); border-radius: 16px; padding: 10px 24px;
+  font-family: 'Fredoka One', cursive; font-size: 1.2rem;
+  border: 3px solid var(--dark); box-shadow: 3px 3px 0 var(--dark);
+  text-align: center; max-width: 200px; margin: 0 auto;
+}
+</style>
+</head>
+<body>
+<a href="index.html" class="back-btn">← Hjem</a>
+<h1>🐘 Gæt dyret!</h1>
+<p class="sub">De andre stiller ja/nej spørgsmål — du holder telefonen!</p>
+
+<div class="animal-card">
+  <span class="animal-emoji" id="emoji"></span>
+  <div class="animal-name" id="name"></div>
+  <ul class="hint-list" id="hints"></ul>
+</div>
+
+<button class="hint-btn" id="hint-btn" onclick="toggleHints()">💡 Vis hjælpe-hints</button>
+
+<div class="action-row">
+  <button class="action-btn skip" onclick="skip()">⏭ Spring over</button>
+  <button class="action-btn next" onclick="guessed()">🎉 Gættet!</button>
+</div>
+
+<div class="score-display" id="score">⭐ 0 point</div>
+
+<script>
+const ANIMALS = [
+  { emoji: '🐘', name: 'Elefant', hints: ['Har meget lang næse', 'Er grå og kæmpestor', 'Bor i Afrika og Asien'] },
+  { emoji: '🦁', name: 'Løve', hints: ['Kongen af junglen', 'Hanner har stor manke', 'Siger RAAWR'] },
+  { emoji: '🐬', name: 'Delfin', hints: ['Lever i havet', 'Er super smart', 'Hopper over bølger'] },
+  { emoji: '🦒', name: 'Giraf', hints: ['Har verdens længste hals', 'Spiser blade fra høje træer', 'Har plamager'] },
+  { emoji: '🐧', name: 'Pingvin', hints: ['Kan ikke flyve', 'Bor på is', 'Er sort og hvid'] },
+  { emoji: '🦊', name: 'Ræv', hints: ['Er rød og har busket hale', 'Er listig i eventyr', 'Ligner en hund'] },
+  { emoji: '🐙', name: 'Blæksprutte', hints: ['Har 8 arme', 'Lever i havet', 'Kan skifte farve'] },
+  { emoji: '🦋', name: 'Sommerfugl', hints: ['Har farverige vinger', 'Starter som larve', 'Flyver fra blomst til blomst'] },
+  { emoji: '🐊', name: 'Krokodille', hints: ['Har masser af tænder', 'Lever nær floder', 'Er grøn og fladtrykt'] },
+  { emoji: '🦓', name: 'Zebra', hints: ['Er sort og hvid stribet', 'Ligner en hest', 'Bor i Afrika'] },
+  { emoji: '🐼', name: 'Panda', hints: ['Har sorte øjenringe', 'Spiser bambus', 'Er sort og hvid'] },
+  { emoji: '🦅', name: 'Ørn', hints: ['Flyver meget højt', 'Har skarpe kløer', 'Er kongen af luften'] },
+  { emoji: '🐢', name: 'Skildpadde', hints: ['Har et hus på ryggen', 'Er meget langsom', 'Kan leve meget længe'] },
+  { emoji: '🦘', name: 'Kænguru', hints: ['Hopper på to ben', 'Bor i Australien', 'Mor bærer baby i pung'] },
+  { emoji: '🦩', name: 'Flamingo', hints: ['Er lyserød', 'Står på ét ben', 'Har lang hals'] },
+  { emoji: '🐺', name: 'Ulv', hints: ['Hyler mod månen', 'Lever i flokke', 'Ligner en stor hund'] },
+  { emoji: '🦜', name: 'Papegøje', hints: ['Kan efterligne stemmer', 'Er farverig', 'Bor i junglen'] },
+  { emoji: '🐨', name: 'Koala', hints: ['Sover det meste af dagen', 'Spiser eukalyptus', 'Ligner en bjørn men er det ikke'] },
+  { emoji: '🦈', name: 'Haj', hints: ['Har mange skarpe tænder', 'Er havets rovdyr', 'Har finne på ryggen'] },
+  { emoji: '🐸', name: 'Frø', hints: ['Hopper og kvækker', 'Lever nær vand', 'Starter som haletudse'] },
+];
+
+let shuffled = [];
+let idx = 0;
+let score = 0;
+let hintsVisible = false;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function render() {
+  hintsVisible = false;
+  const a = shuffled[idx % shuffled.length];
+  document.getElementById('emoji').textContent = a.emoji;
+  document.getElementById('name').textContent = a.name;
+  document.getElementById('hints').innerHTML = a.hints.map(h => `<li>${h}</li>`).join('');
+  document.getElementById('hints').style.display = 'none';
+  document.getElementById('hint-btn').textContent = '💡 Vis hjælpe-hints';
+  document.getElementById('score').textContent = `⭐ ${score} point`;
+}
+
+function toggleHints() {
+  hintsVisible = !hintsVisible;
+  document.getElementById('hints').style.display = hintsVisible ? 'block' : 'none';
+  document.getElementById('hint-btn').textContent = hintsVisible ? '🙈 Skjul hints' : '💡 Vis hjælpe-hints';
+}
+
+function guessed() { score++; idx++; render(); }
+function skip() { idx++; render(); }
+
+shuffled = shuffle(ANIMALS);
+render();
+</script>
+</body>
+</html>

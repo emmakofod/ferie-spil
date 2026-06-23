@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Nummerplade A→Z</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.top-nav { margin-bottom: 16px; }
+.current-letter {
+  background: var(--sun);
+  border: 4px solid var(--dark);
+  border-radius: 24px;
+  box-shadow: 5px 5px 0 var(--dark);
+  text-align: center;
+  padding: 24px;
+  margin: 0 auto 20px;
+  max-width: 340px;
+}
+.current-letter .lbl { font-family: 'Fredoka One', cursive; font-size: 1rem; color: var(--sea); margin-bottom: 6px; }
+.current-letter .big { font-family: 'Fredoka One', cursive; font-size: 6rem; line-height: 1; color: var(--dark); animation: pulse 1.5s ease-in-out infinite; }
+.current-letter .hint { font-size: 0.9rem; color: var(--sea); font-weight: 700; margin-top: 6px; }
+
+.found-btn {
+  display: block; width: 100%; max-width: 340px; margin: 0 auto 20px;
+  padding: 18px; border-radius: 18px; border: 4px solid var(--deep);
+  background: var(--green); color: white;
+  font-family: 'Fredoka One', cursive; font-size: 1.4rem;
+  cursor: pointer; box-shadow: 4px 4px 0 var(--deep);
+  touch-action: manipulation;
+}
+.found-btn:active { transform: scale(0.95); }
+
+.progress-wrap { max-width: 600px; margin: 0 auto 16px; }
+.progress-label {
+  font-family: 'Fredoka One', cursive; font-size: 1rem;
+  color: var(--sea); text-align: center; margin-bottom: 10px;
+}
+.letters-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 5px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+@media (max-width: 380px) { .letters-grid { grid-template-columns: repeat(7, 1fr); } }
+
+.letter-chip {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  border: 2px solid var(--dark);
+  background: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+  color: #aaa;
+  transition: all 0.2s;
+}
+.letter-chip.done { background: var(--green); color: white; border-color: #2d6e4a; }
+.letter-chip.active { background: var(--sun); color: var(--dark); border-color: #c8a000; transform: scale(1.15); }
+
+.reset-btn {
+  display: block; margin: 20px auto 0; padding: 12px 24px;
+  border-radius: 14px; border: 3px solid var(--coral);
+  background: var(--white); color: var(--coral);
+  font-family: 'Fredoka One', cursive; font-size: 1rem; cursor: pointer;
+  touch-action: manipulation;
+}
+.reset-btn:active { background: var(--coral); color: white; }
+</style>
+</head>
+<body>
+<div class="top-nav"><a href="index.html" class="back-btn">← Hjem</a></div>
+<h1>🔤 Nummerplade A→Z</h1>
+<p class="sub">Find bogstaverne i rækkefølge på nummerplader!</p>
+
+<div class="current-letter">
+  <div class="lbl">Find dette bogstav:</div>
+  <div class="big" id="current-letter">A</div>
+  <div class="hint" id="hint"></div>
+</div>
+
+<button class="found-btn" id="found-btn" onclick="letterFound()">✅ Fundet!</button>
+
+<div class="progress-wrap">
+  <div class="progress-label" id="progress-label">0 af 26 bogstaver fundet</div>
+  <div class="letters-grid" id="letters-grid"></div>
+</div>
+
+<div class="celebration" id="celebration">
+  🎉 A til Z! Du er champion! 🎉<br>
+  <span style="font-size:1rem;font-weight:700">Alle 26 bogstaver fundet!</span>
+</div>
+
+<button class="reset-btn" onclick="reset()">🔄 Start forfra</button>
+
+<script>
+const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const HINTS = {
+  A:'Starter som i Appelsin 🍊', B:'Starter som i Bil 🚗', C:'Starter som i Cykel 🚲',
+  D:'Starter som i Delfin 🐬', E:'Starter som i Elefant 🐘', F:'Starter som i Fisk 🐟',
+  G:'Starter som i Giraffe 🦒', H:'Starter som i Hest 🐴', I:'Starter som i Is 🍦',
+  J:'Starter som i Jordbær 🍓', K:'Starter som i Kat 🐱', L:'Starter som i Løve 🦁',
+  M:'Starter som i Måge 🦅', N:'Starter som i Næsehorn 🦏', O:'Starter som i Orangutang 🦧',
+  P:'Starter som i Pingvin 🐧', Q:'Næsten ligesom O med hale!', R:'Starter som i Regnbue 🌈',
+  S:'Starter som i Snegl 🐌', T:'Starter som i Tiger 🐯', U:'Starter som i Ugle 🦉',
+  V:'Starter som i Vandmand 🪼', W:'To V\'er sammen!', X:'Et kryds!',
+  Y:'Starter som i Yoyo 🪀', Z:'Det SIDSTE bogstav! 🏆'
+};
+
+let current = 0;
+
+function render() {
+  const grid = document.getElementById('letters-grid');
+  grid.innerHTML = '';
+  LETTERS.forEach((l, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'letter-chip' + (i < current ? ' done' : i === current ? ' active' : '');
+    chip.textContent = l;
+    grid.appendChild(chip);
+  });
+  if (current < LETTERS.length) {
+    document.getElementById('current-letter').textContent = LETTERS[current];
+    document.getElementById('hint').textContent = HINTS[LETTERS[current]];
+    document.getElementById('found-btn').style.display = 'block';
+    document.getElementById('progress-label').textContent = `${current} af 26 bogstaver fundet`;
+  } else {
+    document.getElementById('current-letter').textContent = '🏆';
+    document.getElementById('hint').textContent = 'Du fandt dem alle!';
+    document.getElementById('found-btn').style.display = 'none';
+    document.getElementById('progress-label').textContent = '26 af 26 bogstaver fundet!';
+    document.getElementById('celebration').classList.add('show');
+  }
+  save();
+}
+
+function letterFound() {
+  if (current < LETTERS.length) {
+    current++;
+    render();
+  }
+}
+
+function reset() {
+  current = 0;
+  document.getElementById('celebration').classList.remove('show');
+  render();
+}
+
+function save() { try { localStorage.setItem('nummerplade_current', current); } catch(e){} }
+function load() { try { current = parseInt(localStorage.getItem('nummerplade_current')) || 0; } catch(e){ current = 0; } }
+
+load(); render();
+</script>
+</body>
+</html>

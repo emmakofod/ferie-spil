@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Farve-quiz 🎨</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.score-row {
+  display: flex; justify-content: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.chip {
+  background: var(--sun); border-radius: 999px; padding: 8px 20px;
+  font-family: 'Fredoka One', cursive; font-size: 1rem;
+  border: 3px solid var(--dark); box-shadow: 2px 2px 0 var(--dark);
+}
+.chip.green { background: var(--green); color: white; border-color: #2d6e4a; box-shadow: 2px 2px 0 #2d6e4a; }
+
+/* MIX DISPLAY */
+.mix-card {
+  background: var(--white); border-radius: 24px; border: 4px solid var(--dark);
+  box-shadow: 5px 5px 0 var(--dark); padding: 24px 20px;
+  max-width: 420px; margin: 0 auto 20px; text-align: center;
+}
+.mix-label { font-family: 'Fredoka One', cursive; font-size: 1rem; color: var(--sea); margin-bottom: 16px; }
+.swatches {
+  display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 6px;
+}
+.swatch {
+  width: 72px; height: 72px; border-radius: 18px;
+  border: 3px solid rgba(0,0,0,0.15); flex-shrink: 0;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.15);
+}
+.plus-sign {
+  font-family: 'Fredoka One', cursive; font-size: 2.5rem; color: var(--dark);
+}
+.swatch-labels {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+}
+.swatch-name {
+  width: 72px; text-align: center;
+  font-family: 'Fredoka One', cursive; font-size: 0.85rem; color: var(--dark);
+}
+.plus-spacer { width: 32px; }
+
+/* ANSWER GRID */
+.answer-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 10px; max-width: 420px; margin: 0 auto 16px;
+}
+.answer-btn {
+  padding: 18px 10px; border-radius: 18px; border: 3px solid var(--dark);
+  font-family: 'Fredoka One', cursive; font-size: 1.1rem; cursor: pointer;
+  box-shadow: 3px 3px 0 var(--dark); touch-action: manipulation;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: transform 0.1s;
+}
+.answer-btn:active { transform: scale(0.95); }
+.answer-btn .ans-swatch {
+  width: 32px; height: 32px; border-radius: 8px;
+  border: 2px solid rgba(0,0,0,0.2); flex-shrink: 0;
+}
+
+/* FEEDBACK */
+.feedback {
+  display: none; text-align: center; padding: 20px;
+  border-radius: 24px; border: 4px solid var(--dark);
+  margin: 0 auto 16px; max-width: 420px;
+  font-family: 'Fredoka One', cursive; font-size: 1.4rem;
+  animation: pop 0.3s ease;
+}
+.feedback.show { display: block; }
+.feedback.correct { background: var(--green); color: white; border-color: #2d6e4a; }
+.feedback.wrong { background: var(--coral); color: white; border-color: #b03030; }
+
+.next-btn {
+  display: none; width: 100%; max-width: 420px; margin: 0 auto;
+  padding: 18px; border-radius: 18px; border: 4px solid var(--dark);
+  background: var(--sun); font-family: 'Fredoka One', cursive; font-size: 1.2rem;
+  cursor: pointer; box-shadow: 4px 4px 0 var(--dark); touch-action: manipulation;
+}
+.next-btn.show { display: block; }
+.next-btn:active { transform: scale(0.95); }
+</style>
+</head>
+<body>
+<a href="index.html" class="back-btn">← Hjem</a>
+<h1>🎨 Farve-quiz!</h1>
+<p class="sub">Hvad sker der når man blander to farver?</p>
+
+<div class="score-row">
+  <div class="chip" id="score-chip">⭐ 0 point</div>
+  <div class="chip" id="q-chip">Spørgsmål 1</div>
+</div>
+
+<div class="mix-card">
+  <div class="mix-label">Hvad får du hvis du blander...</div>
+  <div class="swatches">
+    <div class="swatch" id="swatch-a"></div>
+    <div class="plus-sign">+</div>
+    <div class="swatch" id="swatch-b"></div>
+  </div>
+  <div class="swatch-labels">
+    <div class="swatch-name" id="name-a"></div>
+    <div class="plus-spacer"></div>
+    <div class="swatch-name" id="name-b"></div>
+  </div>
+</div>
+
+<div class="answer-grid" id="answer-grid"></div>
+
+<div class="feedback" id="feedback"></div>
+<button class="next-btn" id="next-btn" onclick="nextQ()">➡️ Næste spørgsmål</button>
+
+<script>
+const QUESTIONS = [
+  { a:{name:'Rød',hex:'#E53935'}, b:{name:'Gul',hex:'#FDD835'}, correct:'Orange', answers:['Orange','Grøn','Lilla','Brun'], hex:{'Orange':'#FB8C00','Grøn':'#43A047','Lilla':'#8E24AA','Brun':'#6D4C41'} },
+  { a:{name:'Blå',hex:'#1E88E5'}, b:{name:'Gul',hex:'#FDD835'}, correct:'Grøn', answers:['Orange','Grøn','Lilla','Turkis'], hex:{'Orange':'#FB8C00','Grøn':'#43A047','Lilla':'#8E24AA','Turkis':'#00ACC1'} },
+  { a:{name:'Rød',hex:'#E53935'}, b:{name:'Blå',hex:'#1E88E5'}, correct:'Lilla', answers:['Orange','Grøn','Lilla','Brun'], hex:{'Orange':'#FB8C00','Grøn':'#43A047','Lilla':'#8E24AA','Brun':'#6D4C41'} },
+  { a:{name:'Rød',hex:'#E53935'}, b:{name:'Hvid',hex:'#ECEFF1'}, correct:'Lyserød', answers:['Lyserød','Orange','Lilla','Beige'], hex:{'Lyserød':'#F48FB1','Orange':'#FB8C00','Lilla':'#8E24AA','Beige':'#D7CCC8'} },
+  { a:{name:'Blå',hex:'#1E88E5'}, b:{name:'Hvid',hex:'#ECEFF1'}, correct:'Lyseblå', answers:['Lyseblå','Turkis','Grøn','Grå'], hex:{'Lyseblå':'#90CAF9','Turkis':'#00ACC1','Grøn':'#43A047','Grå':'#90A4AE'} },
+  { a:{name:'Sort',hex:'#263238'}, b:{name:'Hvid',hex:'#ECEFF1'}, correct:'Grå', answers:['Grå','Beige','Brun','Lyseblå'], hex:{'Grå':'#90A4AE','Beige':'#D7CCC8','Brun':'#6D4C41','Lyseblå':'#90CAF9'} },
+  { a:{name:'Rød',hex:'#E53935'}, b:{name:'Sort',hex:'#263238'}, correct:'Mørkerød', answers:['Mørkerød','Lilla','Brun','Orange'], hex:{'Mørkerød':'#B71C1C','Lilla':'#8E24AA','Brun':'#6D4C41','Orange':'#FB8C00'} },
+  { a:{name:'Gul',hex:'#FDD835'}, b:{name:'Hvid',hex:'#ECEFF1'}, correct:'Lysegul', answers:['Lysegul','Beige','Orange','Grøn'], hex:{'Lysegul':'#FFF9C4','Beige':'#D7CCC8','Orange':'#FB8C00','Grøn':'#43A047'} },
+  { a:{name:'Blå',hex:'#1E88E5'}, b:{name:'Grøn',hex:'#43A047'}, correct:'Turkis', answers:['Turkis','Lilla','Lyseblå','Grå'], hex:{'Turkis':'#00ACC1','Lilla':'#8E24AA','Lyseblå':'#90CAF9','Grå':'#90A4AE'} },
+  { a:{name:'Orange',hex:'#FB8C00'}, b:{name:'Rød',hex:'#E53935'}, correct:'Rødorange', answers:['Rødorange','Brun','Lilla','Gul'], hex:{'Rødorange':'#E64A19','Brun':'#6D4C41','Lilla':'#8E24AA','Gul':'#FDD835'} },
+  { a:{name:'Grøn',hex:'#43A047'}, b:{name:'Gul',hex:'#FDD835'}, correct:'Limegrøn', answers:['Limegrøn','Turkis','Orange','Lysegrøn'], hex:{'Limegrøn':'#AEEA00','Turkis':'#00ACC1','Orange':'#FB8C00','Lysegrøn':'#A5D6A7'} },
+  { a:{name:'Lilla',hex:'#8E24AA'}, b:{name:'Rød',hex:'#E53935'}, correct:'Magenta', answers:['Magenta','Orange','Mørkerød','Lyserød'], hex:{'Magenta':'#AD1457','Orange':'#FB8C00','Mørkerød':'#B71C1C','Lyserød':'#F48FB1'} },
+];
+
+let order = [];
+let qIdx = 0;
+let score = 0;
+let answered = false;
+
+function shuffle(arr) {
+  const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a;
+}
+
+function start() {
+  order = shuffle([...Array(QUESTIONS.length).keys()]);
+  qIdx = 0; score = 0;
+  nextQ();
+}
+
+function renderQ() {
+  answered = false;
+  const q = QUESTIONS[order[qIdx % order.length]];
+  document.getElementById('swatch-a').style.background = q.a.hex;
+  document.getElementById('swatch-b').style.background = q.b.hex;
+  document.getElementById('name-a').textContent = q.a.name;
+  document.getElementById('name-b').textContent = q.b.name;
+  document.getElementById('q-chip').textContent = `Spørgsmål ${qIdx+1}`;
+  document.getElementById('score-chip').textContent = `⭐ ${score} point`;
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('next-btn').className = 'next-btn';
+
+  const grid = document.getElementById('answer-grid');
+  grid.innerHTML = '';
+  shuffle(q.answers).forEach(ans => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.style.background = 'white';
+    const sw = document.createElement('div');
+    sw.className = 'ans-swatch';
+    sw.style.background = q.hex[ans];
+    btn.appendChild(sw);
+    btn.appendChild(document.createTextNode(ans));
+    btn.onclick = () => checkAnswer(ans, q.correct, btn, q.hex[q.correct]);
+    grid.appendChild(btn);
+  });
+}
+
+function checkAnswer(ans, correct, btn, correctHex) {
+  if (answered) return;
+  answered = true;
+  const fb = document.getElementById('feedback');
+  if (ans === correct) {
+    score++;
+    fb.textContent = '✅ Rigtigt! Super! 🎉';
+    fb.className = 'feedback correct show';
+    btn.style.background = '#d4f5e0';
+  } else {
+    fb.innerHTML = `❌ Næ! Det bliver <span style="color:white;font-size:1rem">${correct}</span>`;
+    fb.className = 'feedback wrong show';
+    // highlight correct
+    document.querySelectorAll('.answer-btn').forEach(b => {
+      if (b.textContent.trim() === correct) b.style.background = '#d4f5e0';
+    });
+  }
+  document.getElementById('score-chip').textContent = `⭐ ${score} point`;
+  document.getElementById('next-btn').className = 'next-btn show';
+}
+
+function nextQ() { qIdx++; renderQ(); }
+
+start();
+</script>
+</body>
+</html>

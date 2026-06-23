@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Vittigheder 😂</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.laugh-counter {
+  background: var(--sun); border-radius: 999px; padding: 8px 20px;
+  font-family: 'Fredoka One', cursive; font-size: 1rem;
+  border: 2px solid var(--dark); box-shadow: 2px 2px 0 var(--dark);
+  text-align: center; max-width: 200px; margin: 0 auto 16px;
+}
+
+.source-tabs {
+  display: flex; gap: 8px; justify-content: center; margin-bottom: 16px;
+}
+.src-btn {
+  padding: 10px 20px; border-radius: 999px;
+  border: 3px solid var(--dark); font-family: 'Fredoka One', cursive;
+  font-size: 0.9rem; cursor: pointer; touch-action: manipulation;
+  background: white; color: var(--dark); box-shadow: 2px 2px 0 var(--dark);
+}
+.src-btn.active { background: var(--sea); color: white; border-color: var(--deep); box-shadow: 2px 2px 0 var(--deep); }
+.src-btn:active { transform: scale(0.95); }
+
+.joke-card {
+  background: var(--white); border-radius: 24px; border: 4px solid var(--dark);
+  box-shadow: 5px 5px 0 var(--dark); padding: 30px 22px;
+  max-width: 440px; margin: 0 auto 20px; text-align: center;
+  min-height: 200px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 14px;
+}
+.joke-emoji { font-size: 3rem; line-height: 1; }
+.joke-setup {
+  font-family: 'Fredoka One', cursive; font-size: 1.15rem;
+  color: var(--dark); line-height: 1.4;
+}
+.joke-punchline {
+  font-family: 'Fredoka One', cursive; font-size: 1.2rem;
+  color: var(--coral); line-height: 1.4; display: none;
+  animation: pop 0.3s ease;
+}
+.joke-punchline.show { display: block; }
+
+.loading {
+  font-family: 'Fredoka One', cursive; font-size: 1rem; color: var(--sea);
+  animation: pulse 1s ease-in-out infinite; display: none;
+}
+.loading.show { display: block; }
+
+.reveal-btn {
+  display: block; width: 100%; max-width: 440px; margin: 0 auto 10px;
+  padding: 18px; border-radius: 18px; border: 4px solid var(--dark);
+  background: var(--sun); font-family: 'Fredoka One', cursive; font-size: 1.2rem;
+  cursor: pointer; box-shadow: 4px 4px 0 var(--dark); touch-action: manipulation;
+}
+.reveal-btn:active { transform: scale(0.95); }
+.reveal-btn:disabled { opacity: 0.4; }
+
+.next-btn {
+  display: none; width: 100%; max-width: 440px; margin: 0 auto 10px;
+  padding: 18px; border-radius: 18px; border: 4px solid var(--deep);
+  background: var(--sea); color: white;
+  font-family: 'Fredoka One', cursive; font-size: 1.2rem;
+  cursor: pointer; box-shadow: 4px 4px 0 var(--deep); touch-action: manipulation;
+}
+.next-btn.show { display: block; }
+.next-btn:active { transform: scale(0.95); }
+
+.eng-note {
+  display: none; text-align: center; font-size: 0.8rem;
+  color: var(--sea); font-weight: 700; margin-top: 4px; opacity: 0.7;
+}
+.eng-note.show { display: block; }
+</style>
+</head>
+<body>
+<a href="index.html" class="back-btn">← Hjem</a>
+<h1>😂 Vittigheder!</h1>
+<p class="sub">Tryk for at høre svaret!</p>
+
+<div class="laugh-counter" id="laugh-counter">😂 0 grin</div>
+
+<div class="source-tabs">
+  <button class="src-btn active" id="btn-da" onclick="setSource('da')">🇩🇰 Danske</button>
+  <button class="src-btn" id="btn-en" onclick="setSource('en')">🌍 Engelske</button>
+</div>
+
+<div class="joke-card" id="joke-card">
+  <div class="joke-emoji" id="joke-emoji">😄</div>
+  <div class="joke-setup" id="joke-setup">Henter vittighed...</div>
+  <div class="joke-punchline" id="joke-punchline"></div>
+  <div class="loading" id="loading">Henter vittighed... 🤔</div>
+</div>
+
+<button class="reveal-btn" id="reveal-btn" onclick="revealPunchline()">🤔 Hvad er svaret?</button>
+<button class="next-btn" id="next-btn" onclick="nextJoke()">😂 Næste vittighed!</button>
+<p class="eng-note" id="eng-note">🌍 Vittighed på engelsk — fra jokeapi.dev</p>
+
+<script>
+let laughs = 0;
+let revealed = false;
+let source = 'da';
+let daJokes = [];
+let daOrder = [];
+let daIdx = 0;
+
+// Load Danish jokes from JSON
+async function loadDaJokes() {
+  try {
+    const res = await fetch('vittigheder.json');
+    daJokes = await res.json();
+    daOrder = shuffle([...Array(daJokes.length).keys()]);
+  } catch(e) {
+    // fallback inline
+    daJokes = [
+      {setup:"Hvorfor skulle den lille sky gå i skole?", punchline:"Den skulle lære at regne! 🌧️", emoji:"☁️"},
+      {setup:"Hvordan får man en fisk til at grine?", punchline:"Man putter den i kildevand! 🐟", emoji:"🐟"},
+      {setup:"Hvad siger det ene vejskilt til det andet: Er du gift?", punchline:"Nej, jeg er skilt! 🛑", emoji:"🛣️"},
+      {setup:"Hvad kalder man en ko uden ben?", punchline:"En gravko! 🐄", emoji:"🐄"},
+      {setup:"Hvad kalder man en bjørn uden tænder?", punchline:"En gummibamse! 🐻", emoji:"🐻"},
+    ];
+    daOrder = shuffle([...Array(daJokes.length).keys()]);
+  }
+}
+
+function shuffle(arr) {
+  const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a;
+}
+
+function setSource(src) {
+  source = src;
+  document.getElementById('btn-da').classList.toggle('active', src === 'da');
+  document.getElementById('btn-en').classList.toggle('active', src === 'en');
+  nextJoke();
+}
+
+function showJoke(joke) {
+  revealed = false;
+  document.getElementById('loading').classList.remove('show');
+  document.getElementById('joke-emoji').textContent = joke.emoji || '😄';
+  document.getElementById('joke-setup').textContent = joke.setup;
+  document.getElementById('joke-punchline').textContent = joke.punchline;
+  document.getElementById('joke-punchline').classList.remove('show');
+  document.getElementById('reveal-btn').style.display = 'block';
+  document.getElementById('reveal-btn').disabled = false;
+  document.getElementById('next-btn').className = 'next-btn';
+  document.getElementById('eng-note').className = source === 'en' ? 'eng-note show' : 'eng-note';
+}
+
+function showDaJoke() {
+  if (daJokes.length === 0) return;
+  if (daIdx >= daOrder.length) { daOrder = shuffle([...Array(daJokes.length).keys()]); daIdx = 0; }
+  const joke = daJokes[daOrder[daIdx++]];
+  showJoke(joke);
+}
+
+async function showEnJoke() {
+  document.getElementById('loading').classList.add('show');
+  document.getElementById('joke-setup').textContent = '';
+  document.getElementById('reveal-btn').disabled = true;
+  try {
+    const res = await fetch('https://v2.jokeapi.dev/joke/Pun,Misc?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&type=twopart', {signal: AbortSignal.timeout(4000)});
+    const data = await res.json();
+    if (data?.setup && data?.delivery) {
+      showJoke({setup: data.setup, punchline: data.delivery, emoji: '😂'});
+      return;
+    }
+  } catch(e) {}
+  // fallback to danish if offline
+  source = 'da';
+  document.getElementById('btn-da').classList.add('active');
+  document.getElementById('btn-en').classList.remove('active');
+  showDaJoke();
+}
+
+function nextJoke() {
+  if (source === 'da') showDaJoke();
+  else showEnJoke();
+}
+
+function revealPunchline() {
+  if (revealed) return;
+  revealed = true;
+  document.getElementById('joke-punchline').classList.add('show');
+  document.getElementById('reveal-btn').style.display = 'none';
+  document.getElementById('next-btn').className = 'next-btn show';
+  laughs++;
+  document.getElementById('laugh-counter').textContent = `😂 ${laughs} grin`;
+}
+
+// Init
+loadDaJokes().then(() => showDaJoke());
+</script>
+</body>
+</html>

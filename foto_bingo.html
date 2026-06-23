@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Foto-bingo 📸</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.score-bar {
+  background: var(--sun); border-radius: 16px; padding: 10px 24px;
+  font-family: 'Fredoka One', cursive; font-size: 1.2rem;
+  border: 3px solid var(--dark); box-shadow: 3px 3px 0 var(--dark);
+  text-align: center; max-width: 280px; margin: 0 auto 20px;
+}
+
+.bingo-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 12px; max-width: 680px; margin: 0 auto;
+}
+@media (min-width: 600px) { .bingo-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.bingo-card {
+  background: var(--white); border-radius: 18px;
+  border: 3px solid var(--dark); box-shadow: 3px 3px 0 var(--dark);
+  overflow: hidden; cursor: pointer; touch-action: manipulation;
+  transition: transform 0.15s;
+  min-height: 140px; display: flex; flex-direction: column;
+}
+.bingo-card:active { transform: scale(0.96); }
+.bingo-card.done { border-color: var(--green); box-shadow: 3px 3px 0 var(--green); }
+
+.card-top {
+  padding: 14px 10px 8px; text-align: center; flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+}
+.card-emoji { font-size: 2.4rem; line-height: 1; }
+.card-label { font-weight: 800; font-size: 0.82rem; line-height: 1.2; }
+
+.card-photo {
+  width: 100%; height: 90px; object-fit: cover; display: none;
+}
+.bingo-card.done .card-photo[src] { display: block; }
+
+.card-footer {
+  padding: 8px; background: var(--green); text-align: center;
+  font-family: 'Fredoka One', cursive; font-size: 0.85rem; color: white;
+  display: none;
+}
+.bingo-card.done .card-footer { display: block; }
+
+/* hidden file input */
+#camera-input { display: none; }
+
+/* modal */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  z-index: 100; align-items: center; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: white; border-radius: 24px; border: 4px solid var(--dark);
+  padding: 24px; max-width: 380px; width: 90%; text-align: center;
+}
+.modal h2 { font-family: 'Fredoka One', cursive; font-size: 1.5rem; margin-bottom: 6px; }
+.modal p { font-size: 0.9rem; color: var(--sea); font-weight: 700; margin-bottom: 20px; }
+.modal-emoji { font-size: 3.5rem; margin-bottom: 8px; }
+.modal-preview { width: 100%; border-radius: 14px; margin-bottom: 14px; display: none; }
+.modal-btn-row { display: flex; gap: 10px; flex-direction: column; }
+.modal-btn {
+  padding: 14px; border-radius: 14px; border: 3px solid var(--dark);
+  font-family: 'Fredoka One', cursive; font-size: 1rem; cursor: pointer;
+  box-shadow: 3px 3px 0 var(--dark); touch-action: manipulation;
+}
+.modal-btn.take { background: var(--sun); }
+.modal-btn.done-btn { background: var(--green); color: white; border-color: #2d6e4a; box-shadow: 3px 3px 0 #2d6e4a; }
+.modal-btn.cancel { background: white; color: var(--coral); border-color: var(--coral); box-shadow: 3px 3px 0 var(--coral); }
+.modal-btn:active { transform: scale(0.95); }
+
+.reset-btn {
+  display: block; margin: 16px auto 0; padding: 12px 24px;
+  border-radius: 14px; border: 3px solid var(--coral);
+  background: white; color: var(--coral);
+  font-family: 'Fredoka One', cursive; font-size: 1rem; cursor: pointer;
+}
+.reset-btn:active { background: var(--coral); color: white; }
+</style>
+</head>
+<body>
+<a href="index.html" class="back-btn">← Hjem</a>
+<h1>📸 Foto-bingo!</h1>
+<p class="sub">Find det og tag et billede! Billeder gemmes på din enhed.</p>
+
+<div class="score-bar" id="score-bar">📸 0 af 12 fundet</div>
+
+<div class="bingo-grid" id="bingo-grid"></div>
+
+<div class="celebration" id="celebration">
+  📸 BINGO! Alle billeder taget! 📸<br>
+  <span style="font-size:1rem;font-weight:700">Du er en rigtig fotograf!</span>
+</div>
+
+<button class="reset-btn" onclick="confirmReset()">🔄 Start forfra</button>
+
+<!-- Hidden camera input -->
+<input type="file" id="camera-input" accept="image/*" capture="environment">
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-emoji" id="modal-emoji"></div>
+    <h2 id="modal-title"></h2>
+    <p id="modal-desc"></p>
+    <img class="modal-preview" id="modal-preview" src="" alt="preview">
+    <div class="modal-btn-row">
+      <button class="modal-btn take" id="take-btn" onclick="openCamera()">📷 Tag et billede!</button>
+      <button class="modal-btn done-btn" id="done-btn" onclick="markDone()" style="display:none">✅ Gem og luk</button>
+      <button class="modal-btn cancel" onclick="closeModal()">✖ Luk</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ITEMS = [
+  { emoji: '⛪', label: 'Rundt kirketårn', desc: 'Bornholm har 4 runde kirker — find en!' },
+  { emoji: '🪨', label: 'Klippegrund', desc: 'Find de store grå klippeblokke ved kysten' },
+  { emoji: '🌊', label: 'Bølger ved klipperne', desc: 'Havet der slår ind mod stenene' },
+  { emoji: '🦅', label: 'Måge', desc: 'En måge der flyver eller sidder' },
+  { emoji: '🌲', label: 'Fyrreskov', desc: 'En skov med høje fyrretræer' },
+  { emoji: '🚲', label: 'Cyklist', desc: 'Nogen der cykler — der er mange cykelstier!' },
+  { emoji: '🍦', label: 'Is!', desc: 'En isbutik eller et is i hånden 😋' },
+  { emoji: '🐑', label: 'Får på mark', desc: 'Hvide fluffy får ude på en grøn mark' },
+  { emoji: '🏚️', label: 'Gammelt røgeri', desc: 'De kegleformede bygninger med sort tag' },
+  { emoji: '🌸', label: 'Lyng i blomst', desc: 'Lilla lyng ude i naturen' },
+  { emoji: '⛵', label: 'Sejlbåd', desc: 'En sejlbåd i havnen eller på havet' },
+  { emoji: '🌅', label: 'Solnedgang', desc: 'Den smukke himmel når solen går ned' },
+];
+
+let state = {}; // { idx: { done: bool, photo: base64 } }
+let activeIdx = null;
+let pendingPhoto = null;
+
+function load() {
+  try { state = JSON.parse(localStorage.getItem('foto_bingo_state') || '{}'); } catch(e) { state = {}; }
+}
+function save() {
+  try { localStorage.setItem('foto_bingo_state', JSON.stringify(state)); } catch(e) {}
+}
+
+function render() {
+  const grid = document.getElementById('bingo-grid');
+  grid.innerHTML = '';
+  let doneCount = 0;
+  ITEMS.forEach((item, i) => {
+    const s = state[i] || {};
+    if (s.done) doneCount++;
+    const card = document.createElement('div');
+    card.className = 'bingo-card' + (s.done ? ' done' : '');
+    card.onclick = () => openModal(i);
+    const photo = s.photo ? `<img class="card-photo" src="${s.photo}" alt="">` : `<img class="card-photo" src="">`;
+    card.innerHTML = `
+      <div class="card-top">
+        <span class="card-emoji">${item.emoji}</span>
+        <span class="card-label">${item.label}</span>
+      </div>
+      ${photo}
+      <div class="card-footer">✅ Taget!</div>
+    `;
+    grid.appendChild(card);
+  });
+  document.getElementById('score-bar').textContent = `📸 ${doneCount} af ${ITEMS.length} fundet`;
+  const cel = document.getElementById('celebration');
+  if (doneCount === ITEMS.length) cel.classList.add('show');
+  else cel.classList.remove('show');
+}
+
+function openModal(idx) {
+  activeIdx = idx;
+  pendingPhoto = null;
+  const item = ITEMS[idx];
+  const s = state[idx] || {};
+  document.getElementById('modal-emoji').textContent = item.emoji;
+  document.getElementById('modal-title').textContent = item.label;
+  document.getElementById('modal-desc').textContent = item.desc;
+  const preview = document.getElementById('modal-preview');
+  const doneBtn = document.getElementById('done-btn');
+  const takeBtn = document.getElementById('take-btn');
+  if (s.photo) {
+    preview.src = s.photo; preview.style.display = 'block';
+    takeBtn.textContent = '📷 Tag nyt billede';
+    doneBtn.style.display = 'block';
+  } else {
+    preview.style.display = 'none'; preview.src = '';
+    takeBtn.textContent = '📷 Tag et billede!';
+    doneBtn.style.display = 'none';
+  }
+  document.getElementById('modal').classList.add('show');
+}
+
+function openCamera() {
+  document.getElementById('camera-input').click();
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+  activeIdx = null; pendingPhoto = null;
+}
+
+function markDone() {
+  if (activeIdx === null) return;
+  if (!state[activeIdx]) state[activeIdx] = {};
+  state[activeIdx].done = true;
+  if (pendingPhoto) state[activeIdx].photo = pendingPhoto;
+  save(); render(); closeModal();
+}
+
+document.getElementById('camera-input').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    // Compress to max 400px wide
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const maxW = 400;
+      const scale = Math.min(1, maxW / img.width);
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      pendingPhoto = canvas.toDataURL('image/jpeg', 0.7);
+      const preview = document.getElementById('modal-preview');
+      preview.src = pendingPhoto; preview.style.display = 'block';
+      document.getElementById('done-btn').style.display = 'block';
+      document.getElementById('take-btn').textContent = '📷 Tag nyt billede';
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  this.value = '';
+});
+
+function confirmReset() {
+  if (confirm('Slet alle billeder og start forfra?')) {
+    state = {};
+    try { localStorage.removeItem('foto_bingo_state'); } catch(e) {}
+    render();
+  }
+}
+
+load(); render();
+</script>
+</body>
+</html>

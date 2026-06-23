@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Eloàs Ferie 🏝️</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.hero {
+  text-align: center;
+  padding: 40px 20px 28px;
+}
+
+.sun-anim {
+  font-size: 4rem;
+  display: block;
+  animation: spin-bob 4s ease-in-out infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin-bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(8deg); }
+}
+
+.hero-sub {
+  font-size: clamp(1rem, 3vw, 1.2rem);
+  color: var(--sea);
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.section-label {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1rem;
+  color: var(--sea);
+  text-align: center;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin: 28px 0 12px;
+  opacity: 0.8;
+}
+
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+@media (min-width: 600px) {
+  .game-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.game-card {
+  background: var(--white);
+  border-radius: 22px;
+  border: 3px solid var(--dark);
+  box-shadow: 4px 4px 0 var(--dark);
+  padding: 22px 14px 18px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--dark);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: transform 0.15s;
+  touch-action: manipulation;
+  min-height: 130px;
+  justify-content: center;
+}
+
+.game-card:active { transform: scale(0.94); }
+
+.game-card .icon { font-size: 2.8rem; line-height: 1; }
+.game-card .name {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(0.9rem, 3vw, 1.05rem);
+  line-height: 1.2;
+}
+.game-card .tag {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 999px;
+  color: white;
+}
+
+.tag-tur { background: var(--sky); }
+.tag-bornholm { background: var(--green); }
+.tag-altid { background: var(--coral); }
+
+/* card accent colors */
+.gc-blue { border-color: var(--sea); box-shadow: 4px 4px 0 var(--sea); }
+.gc-sun { border-color: #c8a000; box-shadow: 4px 4px 0 #c8a000; background: #fffce8; }
+.gc-green { border-color: #2d6e4a; box-shadow: 4px 4px 0 #2d6e4a; }
+.gc-coral { border-color: #b03030; box-shadow: 4px 4px 0 #b03030; }
+
+.waves {
+  text-align: center;
+  font-size: 2rem;
+  margin: 20px 0 0;
+  animation: wave 2.5s ease-in-out infinite;
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <span class="sun-anim">☀️</span>
+  <h1>Eloàs<br>Ferie! 🏝️</h1>
+  <p class="hero-sub">Klar til eventyr på Bornholm?</p>
+</div>
+
+<p class="section-label">🚗 På vej derhen</p>
+<div class="game-grid">
+  <a href="rejse_bingo.html" class="game-card gc-blue">
+    <span class="icon">🔭</span>
+    <span class="name">Rejse Bingo</span>
+    <span class="tag tag-tur">I bilen & færgen</span>
+  </a>
+  <a href="nummerplade.html" class="game-card gc-sun">
+    <span class="icon">🔤</span>
+    <span class="name">Nummerplade A→Z</span>
+    <span class="tag tag-tur">I bilen</span>
+  </a>
+  <a href="farve_jagt.html" class="game-card gc-coral">
+    <span class="icon">🎨</span>
+    <span class="name">Farve-jagt</span>
+    <span class="tag tag-tur">I bilen</span>
+  </a>
+  <a href="tal_jagt.html" class="game-card gc-sun">
+    <span class="icon">🔢</span>
+    <span class="name">Tal-jagt 0→100</span>
+    <span class="tag tag-tur">I bilen</span>
+  </a>
+  <a href="dyr_gaet.html" class="game-card gc-green">
+    <span class="icon">🐘</span>
+    <span class="name">Gæt dyret!</span>
+    <span class="tag tag-altid">Overalt</span>
+  </a>
+  <a href="memory.html" class="game-card gc-blue">
+    <span class="icon">🃏</span>
+    <span class="name">Bornholm Memory</span>
+    <span class="tag tag-altid">Overalt</span>
+  </a>
+  <a href="tegne_spil.html" class="game-card gc-coral">
+    <span class="icon">🎨</span>
+    <span class="name">Tegne-spil</span>
+    <span class="tag tag-altid">Overalt</span>
+  </a>
+  <a href="farve_quiz.html" class="game-card gc-sun">
+    <span class="icon">🌈</span>
+    <span class="name">Farve-quiz</span>
+    <span class="tag tag-altid">Overalt</span>
+  </a>
+  <a href="mad_libs.html" class="game-card gc-green">
+    <span class="icon">📖</span>
+    <span class="name">Skøre historier</span>
+    <span class="tag tag-altid">Overalt</span>
+  </a>
+  <a href="vittigheder.html" class="game-card gc-coral">
+    <span class="icon">😂</span>
+    <span class="name">Vittigheder</span>
+    <span class="tag tag-altid">Overalt</span>
+  </a>
+</div>
+
+<p class="section-label">🏝️ På Bornholm</p>
+<div class="game-grid">
+  <a href="foto_bingo.html" class="game-card gc-coral">
+    <span class="icon">📸</span>
+    <span class="name">Foto-bingo</span>
+    <span class="tag tag-bornholm">På Bornholm</span>
+  </a>
+  <a href="skat_bingo.html" class="game-card gc-sun">
+    <span class="icon">💎</span>
+    <span class="name">Skat-samler</span>
+    <span class="tag tag-bornholm">På Bornholm</span>
+  </a>
+  <a href="natur_memory.html" class="game-card gc-green">
+    <span class="icon">🌿</span>
+    <span class="name">Natur Memory</span>
+    <span class="tag tag-bornholm">På Bornholm</span>
+  </a>
+</div>
+
+<div class="waves">🌊🌊🌊</div>
+
+</body>
+</html>

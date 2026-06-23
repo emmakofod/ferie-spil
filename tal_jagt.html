@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Tal-jagt 🔢</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+.sub2 { text-align: center; color: var(--sea); font-weight: 600; margin-bottom: 20px; font-size: 0.85rem; opacity: 0.8; }
+
+.score-bar {
+  background: var(--sun); border-radius: 16px; padding: 10px 24px;
+  font-family: 'Fredoka One', cursive; font-size: 1.2rem;
+  border: 3px solid var(--dark); box-shadow: 3px 3px 0 var(--dark);
+  text-align: center; max-width: 280px; margin: 0 auto 20px;
+}
+
+/* NUMBER GRID */
+.number-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  max-width: 500px;
+  margin: 0 auto 24px;
+}
+
+@media (min-width: 480px) {
+  .number-grid { grid-template-columns: repeat(5, 1fr); }
+}
+
+.num-card {
+  background: var(--white);
+  border-radius: 18px;
+  border: 3px solid var(--dark);
+  box-shadow: 3px 3px 0 var(--dark);
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.12s;
+  position: relative;
+  overflow: hidden;
+}
+.num-card:active { transform: scale(0.92); }
+
+.num-card.found {
+  background: var(--green);
+  border-color: #2d6e4a;
+  box-shadow: 3px 3px 0 #2d6e4a;
+}
+
+.num-card .number {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(1.4rem, 5vw, 2rem);
+  color: var(--dark);
+  line-height: 1;
+}
+.num-card.found .number { color: white; opacity: 0.5; font-size: clamp(1rem, 3.5vw, 1.4rem); }
+
+.num-card .checkmark {
+  display: none;
+  font-size: 1.8rem;
+  position: absolute;
+}
+.num-card.found .checkmark { display: block; }
+
+.num-card .hint-text {
+  font-size: clamp(0.55rem, 1.6vw, 0.68rem);
+  font-weight: 800;
+  color: #888;
+  text-align: center;
+  line-height: 1.2;
+  padding: 0 4px;
+}
+.num-card.found .hint-text { color: rgba(255,255,255,0.7); }
+
+/* UNDO */
+.undo-btn {
+  display: block; margin: 0 auto 12px; padding: 10px 20px;
+  border-radius: 14px; border: 3px solid var(--sea);
+  background: var(--white); color: var(--sea);
+  font-family: 'Fredoka One', cursive; font-size: 0.95rem; cursor: pointer;
+  touch-action: manipulation;
+}
+.undo-btn:active { background: var(--sea); color: white; }
+
+.reset-btn {
+  display: block; margin: 16px auto 0; padding: 12px 24px;
+  border-radius: 14px; border: 3px solid var(--coral);
+  background: var(--white); color: var(--coral);
+  font-family: 'Fredoka One', cursive; font-size: 1rem; cursor: pointer;
+  touch-action: manipulation;
+}
+.reset-btn:active { background: var(--coral); color: white; }
+</style>
+</head>
+<body>
+
+<a href="index.html" class="back-btn">← Hjem</a>
+<h1>🔢 Tal-jagt!</h1>
+<p class="sub">Find alle tallene på skilte, nummerplader og bygninger!</p>
+<p class="sub2">Tryk på tallet når du ser det — ikke i rækkefølge!</p>
+
+<div class="score-bar" id="score-bar">⭐ 0 af 20 fundet</div>
+
+<div class="number-grid" id="number-grid"></div>
+
+<button class="undo-btn" onclick="undo()">↩️ Fortryd sidste</button>
+
+<div class="celebration" id="celebration">
+  🎉 ALLE TAL FUNDET! 🎉<br>
+  <span style="font-size:1rem;font-weight:700">Du er en tal-mester!</span>
+</div>
+
+<button class="reset-btn" onclick="reset()">🔄 Start forfra</button>
+
+<script>
+const NUMBERS = [
+  { n: 0,   hint: 'Nul! 🥚' },
+  { n: 1,   hint: 'Én ting' },
+  { n: 2,   hint: 'To ting' },
+  { n: 3,   hint: 'Tre ting' },
+  { n: 4,   hint: 'Fire ting' },
+  { n: 5,   hint: 'Fem fingre ✋' },
+  { n: 6,   hint: 'Seks ting' },
+  { n: 7,   hint: 'Syv dage 📅' },
+  { n: 8,   hint: 'Otte ben 🐙' },
+  { n: 9,   hint: 'Ni liv 🐱' },
+  { n: 10,  hint: 'Ti fingre 👐' },
+  { n: 20,  hint: 'Tyve' },
+  { n: 30,  hint: 'Tredive' },
+  { n: 40,  hint: 'Fyrre' },
+  { n: 50,  hint: 'Halvtreds' },
+  { n: 60,  hint: 'Tres' },
+  { n: 70,  hint: 'Halvfjerds' },
+  { n: 80,  hint: 'Firs' },
+  { n: 90,  hint: 'Halvfems' },
+  { n: 100, hint: 'Hundrede! 🏆' },
+];
+
+let found = {};
+let lastFound = null;
+
+function load() {
+  try { found = JSON.parse(localStorage.getItem('tal_jagt_found') || '{}'); } catch(e) { found = {}; }
+}
+function save() {
+  try { localStorage.setItem('tal_jagt_found', JSON.stringify(found)); } catch(e) {}
+}
+
+function render() {
+  const grid = document.getElementById('number-grid');
+  grid.innerHTML = '';
+  let count = 0;
+  NUMBERS.forEach((item) => {
+    const key = String(item.n);
+    if (found[key]) count++;
+    const card = document.createElement('div');
+    card.className = 'num-card' + (found[key] ? ' found' : '');
+    card.innerHTML = `
+      <span class="number">${item.n}</span>
+      <span class="checkmark">✅</span>
+      <span class="hint-text">${item.hint}</span>
+    `;
+    card.onclick = () => toggle(key);
+    grid.appendChild(card);
+  });
+
+  document.getElementById('score-bar').textContent = `⭐ ${count} af ${NUMBERS.length} fundet`;
+
+  const cel = document.getElementById('celebration');
+  if (count === NUMBERS.length) cel.classList.add('show');
+  else cel.classList.remove('show');
+}
+
+function toggle(key) {
+  if (found[key]) return; // already found — use undo instead
+  found[key] = true;
+  lastFound = key;
+  save();
+  render();
+}
+
+function undo() {
+  if (!lastFound) return;
+  delete found[lastFound];
+  lastFound = null;
+  save();
+  render();
+}
+
+function reset() {
+  found = {}; lastFound = null;
+  try { localStorage.removeItem('tal_jagt_found'); } catch(e) {}
+  document.getElementById('celebration').classList.remove('show');
+  render();
+}
+
+load();
+render();
+</script>
+</body>
+</html>

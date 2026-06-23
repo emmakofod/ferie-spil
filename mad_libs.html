@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Skøre historier 📖</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+/* SCREENS */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* FILL-IN SCREEN */
+.fill-card {
+  background: var(--white); border-radius: 22px; border: 3px solid var(--dark);
+  box-shadow: 4px 4px 0 var(--dark); padding: 22px 18px;
+  max-width: 480px; margin: 0 auto 16px;
+}
+.story-title {
+  font-family: 'Fredoka One', cursive; font-size: 1.2rem;
+  color: var(--sea); margin-bottom: 16px; text-align: center;
+}
+.field-group { margin-bottom: 14px; }
+.field-label {
+  font-family: 'Fredoka One', cursive; font-size: 0.9rem;
+  color: var(--sea); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;
+}
+.field-input {
+  width: 100%; padding: 12px 14px; border-radius: 12px;
+  border: 3px solid var(--dark); font-family: 'Nunito', sans-serif;
+  font-size: 1rem; font-weight: 700; color: var(--dark);
+  background: white; outline: none;
+}
+.field-input:focus { border-color: var(--sea); box-shadow: 0 0 0 2px rgba(27,108,168,0.2); }
+
+.options-row {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px;
+}
+.option-chip {
+  padding: 7px 14px; border-radius: 999px; border: 2px solid var(--dark);
+  background: white; font-family: 'Fredoka One', cursive; font-size: 0.85rem;
+  cursor: pointer; touch-action: manipulation;
+}
+.option-chip:active, .option-chip.selected { background: var(--sun); border-color: #c8a000; }
+
+.tell-btn {
+  display: block; width: 100%; max-width: 480px; margin: 0 auto;
+  padding: 18px; border-radius: 18px; border: 4px solid var(--dark);
+  background: var(--green); color: white;
+  font-family: 'Fredoka One', cursive; font-size: 1.3rem;
+  cursor: pointer; box-shadow: 4px 4px 0 var(--dark); touch-action: manipulation;
+}
+.tell-btn:active { transform: scale(0.95); }
+
+/* STORY SCREEN */
+.story-card {
+  background: var(--white); border-radius: 22px; border: 3px solid var(--dark);
+  box-shadow: 4px 4px 0 var(--dark); padding: 24px 20px;
+  max-width: 480px; margin: 0 auto 20px;
+  font-size: 1.05rem; font-weight: 700; line-height: 1.8; color: var(--dark);
+}
+.story-card .stitle {
+  font-family: 'Fredoka One', cursive; font-size: 1.4rem;
+  color: var(--sea); margin-bottom: 14px; text-align: center;
+}
+.highlight {
+  color: var(--coral); font-family: 'Fredoka One', cursive;
+  font-size: 1.1rem; text-decoration: underline wavy var(--sun);
+}
+
+.bottom-row { display: flex; gap: 10px; max-width: 480px; margin: 0 auto; }
+.bottom-btn {
+  flex: 1; padding: 16px 8px; border-radius: 16px; border: 3px solid var(--dark);
+  font-family: 'Fredoka One', cursive; font-size: 1rem; cursor: pointer;
+  box-shadow: 3px 3px 0 var(--dark); touch-action: manipulation;
+}
+.bottom-btn.again { background: var(--sun); }
+.bottom-btn.new { background: var(--sea); color: white; border-color: var(--deep); box-shadow: 3px 3px 0 var(--deep); }
+.bottom-btn:active { transform: scale(0.95); }
+</style>
+</head>
+<body>
+<a href="index.html" class="back-btn">← Hjem</a>
+<h1>📖 Skøre historier!</h1>
+<p class="sub">Udfyld ordene — så læser vi historien højt!</p>
+
+<!-- FILL-IN SCREEN -->
+<div id="screen-fill" class="screen active">
+  <div class="fill-card">
+    <div class="story-title" id="fill-title"></div>
+    <div id="fields-container"></div>
+  </div>
+  <button class="tell-btn" onclick="showStory()">📖 Læs historien!</button>
+</div>
+
+<!-- STORY SCREEN -->
+<div id="screen-story" class="screen">
+  <div class="story-card" id="story-output"></div>
+  <div class="bottom-row">
+    <button class="bottom-btn again" onclick="showFill()">✏️ Prøv igen</button>
+    <button class="bottom-btn new" onclick="newStory()">🎲 Ny historie</button>
+  </div>
+</div>
+
+<script>
+const STORIES = [
+  {
+    title: '🚢 Turen til Bornholm',
+    fields: [
+      { key: 'dyr', label: '🐾 Et dyr', hint: 'fx haj, elefant, kat', options: ['haj','elefant','kat','drage','pingvin'] },
+      { key: 'mad', label: '🍕 En slags mad', hint: 'fx pizza, spaghetti, is', options: ['pizza','spaghetti','is','pandekager','sushi'] },
+      { key: 'farve', label: '🎨 En farve', hint: 'fx lilla, neongrøn', options: ['lilla','neongrøn','orange','pink','turkis'] },
+      { key: 'navn', label: '👤 Et navn', hint: 'fx Bamsefar, Kong Gurk', options: ['Bamsefar','Kong Gurk','Fru Boble','Kaptajn Snor'] },
+      { key: 'tal', label: '🔢 Et tal', hint: 'fx 7, 100, 3000', options: ['7','42','100','3000','11'] },
+    ],
+    build: (v) => `Der var engang en <span class="highlight">${v.farve}</span> <span class="highlight">${v.dyr}</span> der hed <span class="highlight">${v.navn}</span>. <span class="highlight">${v.navn}</span> elskede <span class="highlight">${v.mad}</span> over alt andet i verden — og spiste det <span class="highlight">${v.tal}</span> gange om dagen! En dag besluttede <span class="highlight">${v.navn}</span> at tage med færgen til Bornholm. Men på færgen opdagede alle passagererne at <span class="highlight">${v.navn}</span> havde spist AL maden i restauranten! Kaptajnen råbte: "Bare rolig! Vi finder mere <span class="highlight">${v.mad}</span> på Bornholm!" Og det gjorde de. Slutningen. 🎉`,
+  },
+  {
+    title: '🏖️ Stranden er mærkelig i dag',
+    fields: [
+      { key: 'dyr', label: '🐾 Et vanddyr', hint: 'fx blæksprutte, havhest', options: ['blæksprutte','havhest','kæmpe krabbe','havmand','tun'] },
+      { key: 'ting', label: '🎒 En ting man kan finde på stranden', hint: 'fx paraply, gammel sko', options: ['paraply','gammel sko','trampolin','gammel skat','gummibåd'] },
+      { key: 'lyd', label: '🔊 En sjov lyd', hint: 'fx BLOP, WUUUSH, SLUUUP', options: ['BLOP','WUUUSH','SLUUUP','BOING','GLUGG'] },
+      { key: 'adj', label: '✨ Et beskrivende ord', hint: 'fx klistret, fnugget, lysende', options: ['klistret','fnugget','lysende','slimet','glinsende'] },
+      { key: 'navn', label: '👤 Et navn', hint: 'fx Prinsesse Guf, Hr. Bøvs', options: ['Prinsesse Guf','Hr. Bøvs','Fru Vims','Kaptajn Klat','Lord Bums'] },
+    ],
+    build: (v) => `Det var en dejlig dag på stranden. Pludselig lød der et højt "<span class="highlight">${v.lyd}</span>!" fra havet. En <span class="highlight">${v.adj}</span> <span class="highlight">${v.dyr}</span> dukkede op fra bølgerne og sagde: "Undskyld, har nogen set min <span class="highlight">${v.ting}</span>?" Alle på stranden var chokerede — undtagen <span class="highlight">${v.navn}</span> som roligt sagde: "Jo, jeg sidder på den!" <span class="highlight">${v.navn}</span> rejste sig op, og der lå den — helt <span class="highlight">${v.adj}</span>. <span class="highlight">${v.dyr}</span>en sagde "<span class="highlight">${v.lyd}</span>!" igen og forsvandt ned i bølgerne. <span class="highlight">${v.navn}</span> vinkede farvel. 🌊`,
+  },
+  {
+    title: '🌲 Den mystiske skov på Bornholm',
+    fields: [
+      { key: 'dyr', label: '🐾 Et skovdyr', hint: 'fx ræv, bjørn, enhjørning', options: ['ræv','bjørn','enhjørning','ulv','kæmpe snegl'] },
+      { key: 'farve', label: '🎨 En farve', hint: 'fx knallgul, mørkelilla', options: ['knallgul','mørkelilla','neonrød','guldglinsende','turkis'] },
+      { key: 'mad', label: '🍄 Noget man kan finde i skoven', hint: 'fx svampe, bær, kogler', options: ['svampe','bær','kogler','mosklumper','trærødder'] },
+      { key: 'verb', label: '🏃 Noget man kan gøre (et udsagnsord)', hint: 'fx hoppe, synge, baglæns gå', options: ['hoppe','synge','baglæns gå','spinde rundt','brøle'] },
+      { key: 'tal', label: '🔢 Et meget stort tal', hint: 'fx 1 million, 9999', options: ['1 million','9999','88','uendelig','5 milliarder'] },
+    ],
+    build: (v) => `Dybt inde i Bornholms <span class="highlight">${v.farve}</span> skov boede en <span class="highlight">${v.dyr}</span>. Hvert eneste morgen stod <span class="highlight">${v.dyr}</span>en op og begyndte at <span class="highlight">${v.verb}</span> rundt om alle træerne — <span class="highlight">${v.tal}</span> gange! Bagefter spiste den <span class="highlight">${v.mad}</span> til morgenmad. En dag kom to turister ind i skoven og så det. "Hvad laver du?!" råbte de. <span class="highlight">${v.dyr}</span>en svarede: "Jeg træner! Om <span class="highlight">${v.tal}</span> dage skal jeg deltage i VM i at <span class="highlight">${v.verb}</span>!" Turisterne støttede den. <span class="highlight">${v.dyr}</span>en vandt guld. 🏆`,
+  },
+  {
+    title: '🍦 Den magiske isbutik',
+    fields: [
+      { key: 'smag', label: '🍦 En mærkelig is-smag', hint: 'fx løg-is, sko-is, dinosaur-is', options: ['løg-is','sko-is','dinosaur-is','pizza-is','bæ-is'] },
+      { key: 'dyr', label: '🐾 Et dyr', hint: 'fx giraf, kanin, krokodille', options: ['giraf','kanin','krokodille','flodhest','bæver'] },
+      { key: 'adj', label: '✨ Et ord der beskriver noget mærkeligt', hint: 'fx klæbrig, boblet, blinkende', options: ['klæbrig','boblet','blinkende','springende','summende'] },
+      { key: 'sted', label: '📍 Et sted', hint: 'fx månen, havbunden, Grønland', options: ['månen','havbunden','Grønland','en sky','indersiden af en vulkan'] },
+      { key: 'navn', label: '👤 Et sjovt navn', hint: 'fx Iskongen, Fru Vaffel', options: ['Iskongen','Fru Vaffel','Hr. Flødebolle','Prinsesse Softice','Mester Kugle'] },
+    ],
+    build: (v) => `På Bornholm lå der en isbutik der hed "Det <span class="highlight">${v.adj}</span> Ishjørne" og ejeren hed <span class="highlight">${v.navn}</span>. Den mest populære is dér var <span class="highlight">${v.smag}</span> — selvom alle syntes det lød mærkeligt! En dag kom en <span class="highlight">${v.adj}</span> <span class="highlight">${v.dyr}</span> ind og bestilte en kugle. Den tog en bid og råbte: "DETTE SMAGER AF <span class="highlight">${v.sted}</span>!" <span class="highlight">${v.navn}</span> smilede og sagde: "Præcis! Opskriften er fra <span class="highlight">${v.sted}</span>!" <span class="highlight">${v.dyr}</span>en køgte <span class="highlight">${v.smag}</span> hver dag resten af sommerferien. 🍦`,
+  },
+  {
+    title: '🚗 Den lange biltur',
+    fields: [
+      { key: 'dyr', label: '🐾 Et dyr der ikke burde sidde i en bil', hint: 'fx næsehorn, hval, struds', options: ['næsehorn','hval','struds','flodhest','mammut'] },
+      { key: 'sang', label: '🎵 En sang eller melodi', hint: 'fx "Hej Matematik", "Baby Shark"', options: ['Hej Matematik','Baby Shark','En elefant kom marcherende','Let It Go','Bamse og Kylling'] },
+      { key: 'mad', label: '🍕 Rejsemad', hint: 'fx sandwicher, chips, spaghetti', options: ['sandwicher','chips','spaghetti','pandekager','jordbær'] },
+      { key: 'adj', label: '✨ Beskrivende ord', hint: 'fx gigantisk, ultrakornet, duftende', options: ['gigantisk','ultrakornet','duftende','blinkende','hoppende'] },
+      { key: 'tal', label: '🔢 Hvor mange kilometer?', hint: 'fx 5, 1000, 3 millioner', options: ['5','1000','3 millioner','99','halvanden'] },
+    ],
+    build: (v) => `Familie Madsen var på vej til Bornholm da de opdagede at der sad et <span class="highlight">${v.adj}</span> <span class="highlight">${v.dyr}</span> på bagsædet. "Hvornår kom du ind?" spurgte mor. "<span class="highlight">${v.tal}</span> kilometer siden" svarede <span class="highlight">${v.dyr}</span>en. Far sagde roligt: "Nå, vil du have noget <span class="highlight">${v.mad}</span>?" <span class="highlight">${v.dyr}</span>en sagde ja tak og begyndte at synge <span class="highlight">${v.sang}</span> helt fra starten. Alle sang med — også <span class="highlight">${v.dyr}</span>en der faktisk havde en rigtig flot stemme. Det var den bedste bilferie nogensinde. 🚗`,
+  },
+];
+
+let storyIdx = 0;
+let currentStory = null;
+
+function shuffle(arr) {
+  const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a;
+}
+
+const order = shuffle([0,1,2,3,4]);
+
+function loadStory(idx) {
+  currentStory = STORIES[order[idx % order.length]];
+  document.getElementById('fill-title').textContent = currentStory.title;
+
+  const container = document.getElementById('fields-container');
+  container.innerHTML = '';
+  currentStory.fields.forEach(f => {
+    const group = document.createElement('div');
+    group.className = 'field-group';
+    group.innerHTML = `
+      <div class="field-label">${f.label} <span style="font-size:0.78rem;opacity:0.6;font-family:Nunito">${f.hint}</span></div>
+      <input class="field-input" id="field-${f.key}" type="text" placeholder="${f.options[0]}..." autocomplete="off" autocorrect="off">
+      <div class="options-row" id="opts-${f.key}"></div>
+    `;
+    container.appendChild(group);
+
+    const optsRow = group.querySelector(`#opts-${f.key}`);
+    f.options.forEach(opt => {
+      const chip = document.createElement('button');
+      chip.className = 'option-chip';
+      chip.textContent = opt;
+      chip.onclick = () => {
+        document.getElementById(`field-${f.key}`).value = opt;
+        optsRow.querySelectorAll('.option-chip').forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+      };
+      optsRow.appendChild(chip);
+    });
+  });
+}
+
+function showStory() {
+  const values = {};
+  let missing = false;
+  currentStory.fields.forEach(f => {
+    const val = document.getElementById(`field-${f.key}`).value.trim();
+    if (!val) { missing = true; document.getElementById(`field-${f.key}`).focus(); return; }
+    values[f.key] = val;
+  });
+  if (missing) { alert('Udfyld alle felterne! 😊'); return; }
+
+  const output = document.getElementById('story-output');
+  output.innerHTML = `<div class="stitle">${currentStory.title}</div>${currentStory.build(values)}`;
+
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-story').classList.add('active');
+}
+
+function showFill() {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-fill').classList.add('active');
+}
+
+function newStory() {
+  storyIdx++;
+  loadStory(storyIdx);
+  showFill();
+}
+
+loadStory(0);
+</script>
+</body>
+</html>
