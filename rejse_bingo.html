@@ -7,187 +7,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Bornholm Bingo 🚢</title>
 <link rel="stylesheet" href="shared.css">
-<style>
-header {
-    text-align: center;
-    padding: 28px 0 10px;
-  }
-
-  .subtitle {
-    font-size: clamp(0.95rem, 2.5vw, 1.1rem);
-    color: var(--sea);
-    font-weight: 700;
-    margin-top: 6px;
-  }
-
-  /* ---- TABS ---- */
-  .phase-tabs {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin: 18px 0 12px;
-    max-width: 720px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .tab {
-    padding: 14px 10px;
-    border-radius: 16px;
-    border: 3px solid var(--sea);
-    background: var(--white);
-    color: var(--sea);
-    font-family: 'Fredoka One', cursive;
-    font-size: clamp(0.95rem, 2.2vw, 1.1rem);
-    cursor: pointer;
-    transition: all 0.2s;
-    /* Big touch target */
-    min-height: 56px;
-    touch-action: manipulation;
-    line-height: 1.2;
-  }
-
-  .tab.active {
-    background: var(--sea);
-    color: var(--white);
-    border-color: var(--sea);
-    box-shadow: 0 4px 12px rgba(27,108,168,0.35);
-    transform: scale(1.03);
-  }
-
-  /* ---- SCORE BAR ---- */
-  .score-bar {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 14px;
-    flex-wrap: wrap;
-  }
-
-  .score-display {
-    background: var(--sun);
-    border-radius: 16px;
-    padding: 12px 28px;
-    font-family: 'Fredoka One', cursive;
-    font-size: clamp(1.2rem, 3vw, 1.5rem);
-    color: var(--dark);
-    border: 3px solid var(--dark);
-    box-shadow: 3px 3px 0 var(--dark);
-  }
-
-  .reset-btn {
-    padding: 12px 22px;
-    border-radius: 14px;
-    border: 3px solid var(--coral);
-    background: var(--white);
-    color: var(--coral);
-    font-family: 'Fredoka One', cursive;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    min-height: 50px;
-    touch-action: manipulation;
-  }
-  .reset-btn:active { background: var(--coral); color: white; }
-
-  /* ---- GRID ---- */
-  .grid {
-    display: grid;
-    /* iPad portrait: 4 cols, landscape: 5 cols */
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    max-width: 720px;
-    margin: 0 auto;
-  }
-
-  @media (min-width: 900px) {
-    .grid { grid-template-columns: repeat(5, 1fr); }
-  }
-  @media (max-width: 500px) {
-    .grid { grid-template-columns: repeat(3, 1fr); }
-    .phase-tabs { grid-template-columns: repeat(2, 1fr); }
-  }
-
-  /* ---- CARD ---- */
-  .card {
-    background: var(--white);
-    border-radius: 18px;
-    border: 3px solid var(--dark);
-    padding: 18px 8px 14px;
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.15s, background 0.2s;
-    box-shadow: 3px 3px 0 var(--dark);
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-    /* Minimum touch target */
-    min-height: 110px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-  }
-
-  .card:active { transform: scale(0.92); }
-
-  .card.found {
-    background: var(--green);
-    border-color: #3a7a3a;
-    box-shadow: 3px 3px 0 #3a7a3a;
-  }
-
-  .card .emoji {
-    font-size: clamp(2rem, 5vw, 2.6rem);
-    line-height: 1;
-    display: block;
-  }
-
-  .card .label {
-    font-size: clamp(0.72rem, 1.8vw, 0.85rem);
-    font-weight: 800;
-    line-height: 1.2;
-    color: var(--dark);
-  }
-
-  .card.found .label { color: white; }
-
-  .card .found-stamp {
-    display: none;
-    font-size: 1.6rem;
-  }
-  .card.found .found-stamp { display: block; }
-  .card.found .emoji { opacity: 0.4; font-size: 1.3rem; }
-
-  .waves {
-    text-align: center;
-    font-size: 2rem;
-    margin: 6px 0 14px;
-    animation: wave 2s ease-in-out infinite;
-  }
-
-  .phase-label {
-    text-align: center;
-    font-family: 'Fredoka One', cursive;
-    font-size: clamp(0.95rem, 2.5vw, 1.15rem);
-    color: var(--sea);
-    margin-bottom: 14px;
-  }
-
-  footer {
-    text-align: center;
-    padding: 24px 0 12px;
-    font-size: 0.85rem;
-    color: var(--sea);
-    font-weight: 600;
-  }
-</style>
 </head>
 <body>
 
-<div class="top-nav" style="margin-bottom:12px"><a href="index.html" style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:999px;border:3px solid #1B6CA8;background:white;color:#1B6CA8;font-family:Fredoka One,cursive;font-size:1rem;text-decoration:none">← Hjem</a></div><header>
+<div class="top-nav" style="margin-bottom:12px"><a href="index.html" style="display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:999px;border:3px solid #1B6CA8;background:white;color:#1B6CA8;font-family:Fredoka One,cursive;font-size:1rem;text-decoration:none">←</a></div><header>
   <h1>🚢 Bornholm Bingo!</h1>
   <p class="subtitle">Fra København til Bornholm — hvad kan du spotte?</p>
 </header>
@@ -197,7 +20,7 @@ header {
 <div class="phase-tabs" id="tabs"></div>
 
 <div class="score-bar">
-  <div class="score-display" id="score">⭐ 0 fundet</div>
+  <div class="score-display" id="score"></div>
   <button class="reset-btn" onclick="resetAll()">🔄 Start forfra</button>
 </div>
 
@@ -221,15 +44,15 @@ const phases = [
     items: [
       { emoji: "🚦", label: "Rødt lys" },
       { emoji: "🏗️", label: "Byggekran" },
-      { emoji: "🚌", label: "Gul bus" },
-      { emoji: "🐦", label: "Flok fugle" },
-      { emoji: "⛽", label: "Benzintank" },
+      { img: "assets/yellow_bus.png", label: "Gul bus" },
+      { img: "assets/flok_fugl.png", label: "Flok fugle" },
+      { img: "assets/gas_station.png", label: "Benzinstation" },
       { emoji: "🌳", label: "Skov langs vejen" },
       { emoji: "🐄", label: "Ko på mark" },
       { emoji: "🌾", label: "Kornmark" },
-      { emoji: "💨", label: "Vindmølle" },
+      { img: "assets/wind-turbine.png", label: "Vindmølle" },
       { emoji: "🚜", label: "Traktor" },
-      { emoji: "🏠", label: "Rødt hus" },
+      { emoji: "🏠", label: "Gult hus" },
       { emoji: "🛣️", label: "Motorvejsskilt" },
     ]
   },
@@ -239,14 +62,17 @@ const phases = [
     desc: "Rønne Havn eller Køge — inden I kører ombord",
     items: [
       { emoji: "⚓", label: "Anker / fortøjning" },
-      { emoji: "🦅", label: "Måge" },
+      { img: "assets/seagull.png", label: "Måge" },
       { emoji: "🐟", label: "Fisk i vandet" },
       { emoji: "🚢", label: "Kæmpe færge" },
       { emoji: "⛵", label: "Sejlbåd" },
-      { emoji: "🧲", label: "Kran ved havn" },
+      { emoji: "🏗️", label: "Kran ved havn" },
       { emoji: "🪣", label: "Spand og reb" },
-      { emoji: "🔦", label: "Fyr eller lys" },
+      { emoji: "👷🏼‍♀️", label: "Havneassistant" },
+      { img: "assets/lighthouse.png", label: "Fyr eller lys" },
       { emoji: "🅿️", label: "P-plads til biler" },
+      { emoji: "🚦", label: "Grønt lys" },
+      { emoji: "🚌", label: "Bus" },
     ]
   },
   {
@@ -255,15 +81,15 @@ const phases = [
     desc: "Over Østersøen — ~80 minutter",
     items: [
       { emoji: "🌊", label: "Hvide bølger" },
-      { emoji: "🦆", label: "Edderfugl" },
+      { emoji: "🦆", label: "Fugl" },
       { emoji: "☁️", label: "Sky der ligner noget" },
       { emoji: "⛵", label: "Sejlbåd i det fjerne" },
-      { emoji: "🐬", label: "Marsvin / delfin" },
+      { emoji: "🐬", label: "Delfin" },
       { emoji: "🌅", label: "Solskin på vandet" },
-      { emoji: "🚢", label: "Et andet skib" },
+      { emoji: "🚢", label: "Et andet færge" },
       { emoji: "🪼", label: "Vandmand" },
-      { emoji: "🦅", label: "Måge der flyver med" },
-      { emoji: "💨", label: "Vindmølle i havet" },
+      { img: "assets/seagull.png", label: "Måge der flyver med" },
+      { img: "assets/wind-turbine.png", label: "Vindmølle i havet" },
       { emoji: "🏝️", label: "Land i horisonten" },
       { emoji: "🌈", label: "Regnbue" },
     ]
@@ -274,15 +100,17 @@ const phases = [
     desc: "Når I nærmer jer og kører rundt",
     items: [
       { emoji: "⛪", label: "Rundt kirketårn" },
-      { emoji: "🌲", label: "Fyrreskov" },
+      { emoji: "🌲", label: "Skov" },
       { emoji: "🪨", label: "Klippesten" },
       { emoji: "🚲", label: "Cyklist" },
       { emoji: "🐑", label: "Får på mark" },
       { emoji: "🍦", label: "Isbutik" },
       { emoji: "🎣", label: "Fisker" },
       { emoji: "🏖️", label: "Sandstrand" },
-      { emoji: "🌸", label: "Lyng / hedeblomst" },
-      { emoji: "🏚️", label: "Gammelt røgeri" },
+      { emoji: "🌸", label: "Blomster" },
+      { emoji: "🏚️", label: "Gammelt bygning" },
+      { emoji: "👨🏽‍👩🏽‍👧🏽", label: "Familie" },
+      { emoji: "🏡", label: "Vores hus!" },
     ]
   }
 ];
@@ -300,6 +128,7 @@ function init() {
     btn.onclick = () => { current = p.id; render(); };
     tabsEl.appendChild(btn);
   });
+  
 
   const phase = phases.find(p => p.id === current);
   document.getElementById("phase-label").textContent = phase.desc;
@@ -311,10 +140,17 @@ function init() {
     const key = current + "_" + i;
     const card = document.createElement("div");
     card.className = "card" + (found[key] ? " found" : "");
-    card.innerHTML = `<span class="emoji">${item.emoji}</span><span class="found-stamp">✅</span><div class="label">${item.label}</div>`;
+card.innerHTML = `
+  ${item.img
+    ? `<img src="${item.img}" style="width:3rem;height:3rem;object-fit:contain">`
+    : `<span class="emoji">${item.emoji}</span>`}
+  <span class="found-stamp">✅</span>
+  <div class="label">${item.label}</div>
+`;
     card.onclick = () => toggle(key, card);
     grid.appendChild(card);
   });
+  
 
   updateScore();
 }
@@ -328,12 +164,15 @@ function toggle(key, card) {
 }
 
 function updateScore() {
-  const total = Object.values(found).filter(Boolean).length;
-  document.getElementById("score").textContent = `⭐ ${total} fundet`;
+  const phase = phases.find(p => p.id === current);
+  const phaseTotal = phase.items.length;
+  const total = phase.items.filter((_, idx) => found[current + "_" + idx]).length;
+  
+  document.getElementById("score").textContent = `⭐ ${total} / ${phaseTotal} fundet`;
 
   const allTotal = phases.reduce((sum, p) => sum + p.items.length, 0);
   const cel = document.getElementById("celebration");
-  if (total === allTotal) cel.classList.add("show");
+  if (Object.values(found).filter(Boolean).length === allTotal) cel.classList.add("show");
   else cel.classList.remove("show");
 
   const tabsEl = document.getElementById("tabs");

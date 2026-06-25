@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="da">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Matematik 🔢</title>
+    <link rel="stylesheet" href="shared.css">
+    <style>
+        .diff-row {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .diff-btn {
+            padding: 10px 18px;
+            border-radius: 999px;
+            border: 3px solid var(--dark);
+            background: white;
+            color: var(--dark);
+            font-family: 'Fredoka One', cursive;
+            font-size: 0.95rem;
+            cursor: pointer;
+            touch-action: manipulation;
+            box-shadow: 2px 2px 0 var(--dark);
+        }
+
+        .diff-btn.active {
+            background: var(--p6);
+        }
+
+        .diff-btn:active {
+            transform: scale(0.95);
+        }
+
+        .score-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .score-chip {
+            padding: 8px 18px;
+            border-radius: 999px;
+            border: 3px solid var(--dark);
+            box-shadow: 2px 2px 0 var(--dark);
+            font-family: 'Fredoka One', cursive;
+            font-size: 1rem;
+            color: var(--dark);
+        }
+
+        /* QUESTION CARD */
+        .question-card {
+            background: white;
+            border-radius: 28px;
+            border: 4px solid var(--dark);
+            box-shadow: 5px 5px 0 var(--dark);
+            padding: 32px 24px;
+            max-width: 420px;
+            margin: 0 auto 24px;
+            text-align: center;
+            transition: background 0.3s;
+        }
+
+        .question-card.correct {
+            background: var(--p4);
+            animation: pop 0.4s ease;
+        }
+
+        .question-card.wrong {
+            background: var(--p1);
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20% {
+                transform: translateX(-8px);
+            }
+
+            60% {
+                transform: translateX(8px);
+            }
+        }
+
+        .question-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .question-text {
+            font-family: 'Fredoka One', cursive;
+            font-size: clamp(2.2rem, 8vw, 3.5rem);
+            color: var(--dark);
+            line-height: 1.2;
+            margin-bottom: 8px;
+        }
+
+        .question-hint {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--dark);
+            opacity: 0.6;
+            min-height: 1.4em;
+        }
+
+        /* VISUAL DOTS HELPER */
+        .dot-helper {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 14px auto 0;
+            max-width: 340px;
+            min-height: 40px;
+        }
+
+        .dot-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 6px 8px;
+            border: 2px dashed rgba(0, 0, 0, 0.15);
+        }
+
+        .dot {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        /* ANSWER BUTTONS */
+        .answer-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            max-width: 420px;
+            margin: 0 auto 16px;
+        }
+
+        .answer-btn {
+            padding: 20px 10px;
+            border-radius: 20px;
+            border: 3px solid var(--dark);
+            font-family: 'Fredoka One', cursive;
+            font-size: clamp(1.4rem, 5vw, 2rem);
+            cursor: pointer;
+            box-shadow: 4px 4px 0 var(--dark);
+            touch-action: manipulation;
+            background: white;
+            color: var(--dark);
+            transition: transform 0.1s;
+        }
+
+        .answer-btn:active {
+            transform: scale(0.93);
+        }
+
+        .answer-btn.correct-ans {
+            background: var(--p4) !important;
+            animation: pop 0.3s ease;
+        }
+
+        .answer-btn.wrong-ans {
+            background: var(--p1) !important;
+        }
+
+        /* FEEDBACK */
+        .feedback {
+            text-align: center;
+            min-height: 2rem;
+            margin-bottom: 10px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.3rem;
+            color: var(--dark);
+        }
+
+        /* NEXT BTN */
+        .next-btn {
+            display: none;
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto 12px;
+            padding: 18px;
+            border-radius: 18px;
+            border: 4px solid var(--dark);
+            background: var(--p3);
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 var(--dark);
+            touch-action: manipulation;
+            color: var(--dark);
+        }
+
+        .next-btn.show {
+            display: block;
+        }
+
+        .next-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* RESULT SCREEN */
+        .result-card {
+            background: white;
+            border-radius: 28px;
+            border: 4px solid var(--dark);
+            box-shadow: 5px 5px 0 var(--dark);
+            padding: 32px 24px;
+            max-width: 420px;
+            margin: 0 auto 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .result-card.show {
+            display: block;
+            animation: pop 0.4s ease;
+        }
+
+        .result-emoji {
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .result-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .result-sub {
+            font-size: 1rem;
+            font-weight: 700;
+            opacity: 0.7;
+            margin-bottom: 20px;
+        }
+
+        .star-row {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            letter-spacing: 4px;
+        }
+
+        .play-again-btn {
+            width: 100%;
+            padding: 18px;
+            border-radius: 18px;
+            border: 4px solid var(--dark);
+            background: var(--p4);
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 var(--dark);
+            touch-action: manipulation;
+            color: var(--dark);
+        }
+
+        .play-again-btn:active {
+            transform: scale(0.95);
+        }
+
+        .game-area {
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        .help-btn {
+            display: block;
+            margin: 0 auto 12px;
+            padding: 10px 22px;
+            border-radius: 999px;
+            border: 3px solid var(--dark);
+            background: white;
+            color: var(--dark);
+            font-family: 'Fredoka One', cursive;
+            font-size: 1rem;
+            cursor: pointer;
+            touch-action: manipulation;
+            box-shadow: 2px 2px 0 var(--dark);
+        }
+
+        .help-btn.on {
+            background: var(--p3);
+        }
+
+        .help-btn:active {
+            transform: scale(0.95);
+        }
+
+        #dot-helper:empty {
+            display: none;
+        }
+
+        #dot-helper {
+            min-height: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="index.html" class="back-btn">← Hjem</a>
+    <h1>🔢 Matematik!</h1>
+    <p class="sub">Kan du løse opgaverne?</p>
+
+    <div class="diff-row">
+        <button class="diff-btn active" id="diff-let" onclick="setDiff('let')">🐣 Let</button>
+        <button class="diff-btn" id="diff-mellem" onclick="setDiff('mellem')">🤔 Mellem</button>
+        <button class="diff-btn" id="diff-svaer" onclick="setDiff('svaer')">🔥 Svær</button>
+    </div>
+
+    <div class="score-row">
+        <div class="score-chip" id="q-chip">Spørgsmål 1 / 10</div>
+        <div class="score-chip" id="s-chip">⭐ 0 rigtige</div>
+    </div>
+
+    <div class="game-area">
+        <!-- QUESTION -->
+        <div class="question-card" id="question-card">
+            <span class="question-emoji" id="q-emoji">🌟</span>
+            <div class="question-text" id="q-text"></div>
+            <div class="question-hint" id="q-hint"></div>
+            <div class="dot-helper" id="dot-helper"></div>
+        </div>
+
+        <button class="help-btn" id="help-btn" onclick="toggleHelp()">💡 Vis hjælp</button>
+        <div class="answer-grid" id="answer-grid"></div>
+        <div class="feedback" id="feedback"></div>
+        <button class="next-btn" id="next-btn" onclick="nextQuestion()">➡️ Næste opgave!</button>
+
+        <!-- RESULT -->
+        <div class="result-card" id="result-card">
+            <span class="result-emoji" id="result-emoji"></span>
+            <div class="result-title" id="result-title"></div>
+            <div class="star-row" id="star-row"></div>
+            <div class="result-sub" id="result-sub"></div>
+            <button class="play-again-btn" onclick="startGame()">🔄 Prøv igen!</button>
+        </div>
+    </div>
+
+    <script>
+        const TOTAL_Q = 10;
+        let difficulty = 'let';
+        let score = 0;
+        let qNum = 0;
+        let answered = false;
+        let currentAnswer = 0;
+        let helpOn = false;
+        let currentQ = null;
+
+        const EMOJIS_LET = ['🍎', '🐱', '⭐', '🌸', '🎈', '🐸', '🍦', '🐶', '🌈', '🦋'];
+        const EMOJIS_MELLEM = ['🔢', '🎯', '🧮', '💡', '🎲', '🎪', '🏆', '🎨', '🚀', '💎'];
+        const EMOJIS_SVAER = ['🔥', '💥', '⚡', '🧠', '🦁', '🎯', '🏆', '💪', '🌟', '🎖️'];
+
+        function setDiff(d) {
+            difficulty = d;
+            ['let', 'mellem', 'svaer'].forEach(x => {
+                document.getElementById('diff-' + x).classList.toggle('active', x === d);
+            });
+            startGame();
+        }
+
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function makeQuestion() {
+            let a, b, op, answer, text, hint, emoji;
+            const emojis = difficulty === 'let' ? EMOJIS_LET : difficulty === 'mellem' ? EMOJIS_MELLEM : EMOJIS_SVAER;
+            emoji = emojis[Math.floor(Math.random() * emojis.length)];
+
+            if (difficulty === 'let') {
+                // Addition and subtraction 0-10, result always positive
+                op = Math.random() < 0.6 ? '+' : '-';
+                if (op === '+') {
+                    a = randInt(0, 9); b = randInt(0, 10 - a);
+                } else {
+                    a = randInt(1, 10); b = randInt(0, a);
+                }
+                answer = op === '+' ? a + b : a - b;
+                text = `${a} ${op} ${b} = ?`;
+                hint = op === '+' ? `Tæl ${a} og ${b} sammen` : `Tag ${b} væk fra ${a}`;
+
+            } else if (difficulty === 'mellem') {
+                // Addition/subtraction up to 20, simple multiplication (×2, ×3, ×4, ×5)
+                const type = randInt(0, 2);
+                if (type === 0) {
+                    a = randInt(5, 15); b = randInt(1, 20 - a);
+                    op = '+'; answer = a + b;
+                    text = `${a} + ${b} = ?`;
+                    hint = `Tæl videre fra ${a}`;
+                } else if (type === 1) {
+                    a = randInt(5, 20); b = randInt(1, a);
+                    op = '-'; answer = a - b;
+                    text = `${a} - ${b} = ?`;
+                    hint = `Tæl ned fra ${a}`;
+                } else {
+                    b = randInt(2, 5); a = randInt(1, 5);
+                    op = '×'; answer = a * b;
+                    text = `${a} × ${b} = ?`;
+                    hint = `${a} grupper med ${b} i hver`;
+                }
+
+            } else {
+                // Hard: bigger numbers, division, mixed
+                const type = randInt(0, 3);
+                if (type === 0) {
+                    a = randInt(10, 40); b = randInt(10, 50 - a);
+                    answer = a + b; text = `${a} + ${b} = ?`; hint = '';
+                } else if (type === 1) {
+                    a = randInt(15, 50); b = randInt(5, a);
+                    answer = a - b; text = `${a} - ${b} = ?`; hint = '';
+                } else if (type === 2) {
+                    b = randInt(2, 10); a = randInt(2, 10);
+                    answer = a * b; text = `${a} × ${b} = ?`; hint = `${a} gange ${b}`;
+                } else {
+                    b = randInt(2, 4);
+                    answer = randInt(1, 5);
+                    a = b * answer;
+                    text = `${a} ÷ ${b} = ?`;
+                    hint = `Hvor mange ${b}'er er der i ${a}?`;
+                }
+            }
+
+            return { text, hint, answer, emoji };
+        }
+
+        function makeWrongAnswers(correct) {
+            const wrongs = new Set();
+            while (wrongs.size < 3) {
+                const offset = randInt(1, difficulty === 'let' ? 4 : difficulty === 'mellem' ? 6 : 10);
+                const w = Math.random() < 0.5 ? correct + offset : Math.max(0, correct - offset);
+                if (w !== correct) wrongs.add(w);
+            }
+            return [...wrongs];
+        }
+
+        function shuffle(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function makeDot(emoji) {
+            const d = document.createElement('div');
+            d.className = 'dot';
+            d.textContent = emoji;
+            return d;
+        }
+
+        function makeGroup(count, emoji) {
+            const g = document.createElement('div');
+            g.className = 'dot-group';
+            for (let i = 0; i < count; i++) g.appendChild(makeDot(emoji));
+            return g;
+        }
+
+        function makeRowGroup(count, emoji, label) {
+            // Shows dots in rows of 5 for bigger numbers
+            const wrap = document.createElement('div');
+            wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px;';
+            const g = document.createElement('div');
+            g.className = 'dot-group';
+            g.style.flexWrap = 'wrap';
+            g.style.maxWidth = '160px';
+            for (let i = 0; i < Math.min(count, 20); i++) g.appendChild(makeDot(emoji));
+            wrap.appendChild(g);
+            return wrap;
+        }
+
+        function renderVisual(q) {
+            const helper = document.getElementById('dot-helper');
+            helper.innerHTML = '';
+            const parts = q.text.match(/\d+/g);
+            if (!parts) return;
+
+            const FRUIT = ['🍎', '🍊', '🍋', '🍇', '🍓', '🫐', '🍌', '🍉'];
+            const fruit = FRUIT[Math.floor(Math.random() * FRUIT.length)];
+
+            if (q.text.includes('×') && parts.length >= 2) {
+                // Multiplication: show [groups] × [size]
+                const groups = +parts[0];
+                const size = +parts[1];
+                if (groups <= 10 && size <= 10 && groups * size <= 50) {
+                    for (let g = 0; g < groups; g++) {
+                        helper.appendChild(makeGroup(size, fruit));
+                    }
+                }
+
+            } else if (q.text.includes('÷') && parts.length >= 2) {
+                // Division: show [answer] groups of [divisor]
+                // e.g. 10 ÷ 2 = 5 groups of 2
+                const total = +parts[0];
+                const divisor = +parts[1];
+                const answer = total / divisor;
+                if (Number.isInteger(answer) && total <= 40 && answer <= 10) {
+                    for (let g = 0; g < answer; g++) {
+                        helper.appendChild(makeGroup(divisor, fruit));
+                    }
+                }
+
+            } else if (q.text.includes('+')) {
+                const a = +parts[0], b = +parts[1];
+                const FRUIT2 = ['🌟', '🎈', '🌺', '🍬', '🐱', '💙'];
+                const fruit2 = FRUIT2[Math.floor(Math.random() * FRUIT2.length)];
+                if (a <= 50 && b <= 50) {
+                    // Show as rows of 5 for bigger numbers
+                    if (a <= 10 && b <= 10) {
+                        helper.appendChild(makeGroup(a, fruit));
+                        const plus = document.createElement('div');
+                        plus.style.cssText = 'font-family:Fredoka One,cursive;font-size:1.8rem;display:flex;align-items:center;';
+                        plus.textContent = '+';
+                        helper.appendChild(plus);
+                        helper.appendChild(makeGroup(b, fruit2));
+                    } else {
+                        // Bigger numbers: show rows of 5
+                        helper.appendChild(makeRowGroup(a, fruit, '+ ' + b + ' mere'));
+                        helper.appendChild(makeRowGroup(b, fruit2, ''));
+                    }
+                }
+
+            } else if (q.text.includes('-')) {
+                const a = +parts[0], b = +parts[1];
+                if (a <= 50) {
+                    const g = document.createElement('div');
+                    g.className = 'dot-group';
+                    g.style.flexWrap = 'wrap';
+                    g.style.maxWidth = '220px';
+                    for (let i = 0; i < a; i++) {
+                        const d = makeDot(i < (a - b) ? fruit : '❌');
+                        if (i >= (a - b)) d.style.opacity = '0.35';
+                        g.appendChild(d);
+                    }
+                    helper.appendChild(g);
+                }
+            }
+        }
+
+        function renderQuestion(q) {
+            answered = false;
+            currentAnswer = q.answer;
+            currentQ = q;
+
+            const card = document.getElementById('question-card');
+            card.className = 'question-card';
+            document.getElementById('q-emoji').textContent = q.emoji;
+            document.getElementById('q-text').textContent = q.text;
+            document.getElementById('q-hint').textContent = q.hint;
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('next-btn').className = 'next-btn';
+
+            // Visual helper — only show if help is on
+            const helper = document.getElementById('dot-helper');
+            helper.style.display = helpOn ? '' : 'none';
+            if (helpOn) renderVisual(q);
+
+            // Answers
+            const options = shuffle([q.answer, ...makeWrongAnswers(q.answer)]);
+            const grid = document.getElementById('answer-grid');
+            grid.innerHTML = '';
+            // Pick pastel colours for buttons
+            const btnColors = ['#FFB3BA', '#FFF3A3', '#B5EAD7', '#A8D8EA'];
+            options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.style.background = btnColors[idx];
+                btn.textContent = opt;
+                btn.onclick = () => checkAnswer(opt, btn);
+                grid.appendChild(btn);
+            });
+
+            document.getElementById('q-chip').textContent = `Spørgsmål ${qNum} / ${TOTAL_Q}`;
+            document.getElementById('s-chip').textContent = `⭐ ${score} rigtige`;
+        }
+
+        function checkAnswer(chosen, btn) {
+            if (answered) return;
+            answered = true;
+
+            const card = document.getElementById('question-card');
+            const feedback = document.getElementById('feedback');
+
+            if (chosen === currentAnswer) {
+                score++;
+                card.classList.add('correct');
+                btn.classList.add('correct-ans');
+                const msgs = ['🎉 Rigtigt!', '⭐ Super!', '🌟 Fantastisk!', '✅ Ja!', '🏆 Godt klaret!'];
+                feedback.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+            } else {
+                card.classList.add('wrong');
+                btn.classList.add('wrong-ans');
+                // Highlight correct
+                document.querySelectorAll('.answer-btn').forEach(b => {
+                    if (+b.textContent === currentAnswer) b.classList.add('correct-ans');
+                });
+                feedback.textContent = `❌ Svaret var ${currentAnswer}`;
+            }
+
+            document.getElementById('s-chip').textContent = `⭐ ${score} rigtige`;
+
+            if (qNum >= TOTAL_Q) {
+                setTimeout(showResult, 800);
+            } else {
+                document.getElementById('next-btn').className = 'next-btn show';
+            }
+        }
+
+        function nextQuestion() {
+            qNum++;
+            const q = makeQuestion();
+            renderQuestion(q);
+        }
+
+        function showResult() {
+            document.getElementById('question-card').style.display = 'none';
+            document.getElementById('answer-grid').style.display = 'none';
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'none';
+
+            const pct = score / TOTAL_Q;
+            let emoji, title, sub, stars;
+
+            if (pct === 1) {
+                emoji = '🏆'; title = 'PERFEKT!';
+                sub = 'Alle 10 rigtige — du er en matematikstjerne!';
+                stars = '⭐⭐⭐';
+            } else if (pct >= 0.7) {
+                emoji = '🌟'; title = 'Godt klaret!';
+                sub = `${score} ud af ${TOTAL_Q} rigtige — flot arbejde!`;
+                stars = '⭐⭐';
+            } else if (pct >= 0.4) {
+                emoji = '💪'; title = 'Godt forsøg!';
+                sub = `${score} ud af ${TOTAL_Q} — øv dig lidt mere!`;
+                stars = '⭐';
+            } else {
+                emoji = '🤔'; title = 'Prøv igen!';
+                sub = `${score} ud af ${TOTAL_Q} — du kan sagtens!`;
+                stars = '🌱';
+            }
+
+            document.getElementById('result-emoji').textContent = emoji;
+            document.getElementById('result-title').textContent = title;
+            document.getElementById('result-sub').textContent = sub;
+            document.getElementById('star-row').textContent = stars;
+            document.getElementById('result-card').classList.add('show');
+        }
+
+        function toggleHelp() {
+            helpOn = !helpOn;
+            const btn = document.getElementById('help-btn');
+            btn.textContent = helpOn ? '💡 Skjul hjælp' : '💡 Vis hjælp';
+            btn.classList.toggle('on', helpOn);
+            const helper = document.getElementById('dot-helper');
+            if (helpOn && currentQ) {
+                helper.style.display = '';
+                renderVisual(currentQ);
+            } else {
+                helper.style.display = 'none';
+            }
+        }
+
+        function startGame() {
+            score = 0; qNum = 1;
+
+            document.getElementById('question-card').style.display = '';
+            document.getElementById('answer-grid').style.display = '';
+            document.getElementById('feedback').style.display = '';
+            document.getElementById('next-btn').style.display = '';
+            document.getElementById('result-card').classList.remove('show');
+
+            const q = makeQuestion();
+            renderQuestion(q);
+        }
+
+        startGame();
+    </script>
+</body>
+
+</html>

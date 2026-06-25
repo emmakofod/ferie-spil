@@ -6,56 +6,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Skat-samler 💎</title>
 <link rel="stylesheet" href="shared.css">
-<style>
-.score-bar {
-  background: var(--gold); border-radius: 16px; padding: 10px 24px;
-  font-family: 'Fredoka One', cursive; font-size: 1.2rem;
-  border: 3px solid var(--dark); box-shadow: 3px 3px 0 var(--dark);
-  text-align: center; max-width: 280px; margin: 0 auto 20px;
-}
-
-.treasure-grid {
-  display: grid; grid-template-columns: repeat(2, 1fr);
-  gap: 12px; max-width: 600px; margin: 0 auto;
-}
-@media (min-width: 500px) { .treasure-grid { grid-template-columns: repeat(3, 1fr); } }
-
-.treasure-card {
-  background: var(--white); border-radius: 20px;
-  border: 3px solid var(--dark); box-shadow: 3px 3px 0 var(--dark);
-  padding: 18px 12px; text-align: center; cursor: pointer;
-  touch-action: manipulation; transition: transform 0.15s;
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
-  min-height: 130px; justify-content: center;
-}
-.treasure-card:active { transform: scale(0.93); }
-.treasure-card.found {
-  background: linear-gradient(135deg, #FFD447 0%, #F5A623 100%);
-  border-color: #8B6914; box-shadow: 3px 3px 0 #8B6914;
-}
-
-.treasure-emoji { font-size: 2.6rem; line-height: 1; }
-.treasure-label { font-weight: 800; font-size: 0.82rem; line-height: 1.2; }
-.treasure-hint { font-size: 0.72rem; color: #777; font-weight: 600; line-height: 1.2; }
-.treasure-card.found .treasure-hint { color: rgba(0,0,0,0.5); }
-
-.found-stamp {
-  display: none; font-size: 1.6rem;
-}
-.treasure-card.found .found-stamp { display: block; }
-.treasure-card.found .treasure-emoji { opacity: 0.5; font-size: 1.8rem; }
-
-.reset-btn {
-  display: block; margin: 16px auto 0; padding: 12px 24px;
-  border-radius: 14px; border: 3px solid var(--coral);
-  background: white; color: var(--coral);
-  font-family: 'Fredoka One', cursive; font-size: 1rem; cursor: pointer;
-}
-.reset-btn:active { background: var(--coral); color: white; }
-</style>
 </head>
 <body>
-<a href="index.html" class="back-btn">← Hjem</a>
+<a href="index.html" class="back-btn">← </a>
 <h1>💎 Skat-samler!</h1>
 <p class="sub">Find og saml de her skatte på Bornholm!</p>
 

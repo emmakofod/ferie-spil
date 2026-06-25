@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Kryds og Bolle ❌⭕</title>
+<link rel="stylesheet" href="shared.css">
+</head>
+<body>
+<a href="index.html" class="back-btn">← Hjem</a>
+<h1>❌ Kryds og Bolle ⭕</h1>
+
+<!-- MODE SELECT -->
+<div id="screen-mode" class="screen active">
+  <div class="mode-card">
+    <h2>Vælg spiltype</h2>
+    <button class="mode-btn mode-solo" onclick="startSolo()">
+      👧🏽🤖<br>
+      <span style="font-size:1rem;font-weight:700;opacity:0.7">Spil mod robot</span>
+    </button>
+    <button class="mode-btn mode-duo" onclick="startDuo()">
+      👧🏽👩🏼<br>
+      <span style="font-size:1rem;font-weight:700;opacity:0.7">Spil sammen</span>
+    </button>
+  </div>
+</div>
+
+<!-- SOLO GAME -->
+<div id="screen-solo" class="screen">
+  <div class="diff-row">
+    <button class="diff-btn active" id="diff-easy"   onclick="setDiff('easy')">😊 Let</button>
+    <button class="diff-btn"        id="diff-medium" onclick="setDiff('medium')">🤔 Mellem</button>
+    <button class="diff-btn"        id="diff-hard"   onclick="setDiff('hard')">😈 Svær</button>
+  </div>
+
+  <div class="score-row">
+    <div class="score-chip chip-x" id="solo-score-x">❌ Du: 0</div>
+    <div class="score-chip chip-draw" id="solo-score-draw">🤝 0</div>
+    <div class="score-chip chip-o" id="solo-score-o">🤖 Bot: 0</div>
+  </div>
+
+  <div class="status-bar" id="solo-status">Din tur! ❌</div>
+  <div class="thinking" id="solo-thinking"></div>
+  <div class="board" id="solo-board"></div>
+
+  <div class="action-row">
+    <button class="action-btn btn-again" onclick="resetSolo()">🔄 Ny runde</button>
+    <button class="action-btn btn-menu"  onclick="showMenu()">🏠 Menu</button>
+  </div>
+</div>
+
+<!-- DUO GAME -->
+<div id="screen-duo" class="screen">
+  <div class="score-row">
+    <div class="score-chip chip-x" id="duo-score-x">❌ Spiller 1: 0</div>
+    <div class="score-chip chip-draw" id="duo-score-draw">🤝 0</div>
+    <div class="score-chip chip-o" id="duo-score-o">⭕ Spiller 2: 0</div>
+  </div>
+
+  <div class="status-bar" id="duo-status">Spiller 1s tur! ❌</div>
+  <div class="board" id="duo-board"></div>
+
+  <div class="action-row">
+    <button class="action-btn btn-again" onclick="resetDuo()">🔄 Ny runde</button>
+    <button class="action-btn btn-menu"  onclick="showMenu()">🏠 Menu</button>
+  </div>
+</div>
+
+<script>
+// ── HELPERS ────────────────────────────────────────────────
+const WINS = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+
+function checkWinner(b) {
+  for (const [a,c,d] of WINS) {
+    if (b[a] && b[a] === b[c] && b[a] === b[d]) return { winner: b[a], line: [a,c,d] };
+  }
+  if (b.every(c => c)) return { winner: 'draw' };
+  return null;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showMenu() { showScreen('screen-mode'); }
+
+// ── BOT ────────────────────────────────────────────────────
+let difficulty = 'easy';
+
+function setDiff(d) {
+  difficulty = d;
+  ['easy','medium','hard'].forEach(x => {
+    document.getElementById('diff-' + x).classList.toggle('active', x === d);
+  });
+  resetSolo();
+}
+
+function botMove(board) {
+  const empty = board.map((v,i) => v ? null : i).filter(i => i !== null);
+  if (!empty.length) return -1;
+
+  if (difficulty === 'easy') {
+    // 70% random, 30% smart
+    if (Math.random() < 0.7) return empty[Math.floor(Math.random() * empty.length)];
+  }
+  if (difficulty === 'medium') {
+    // Block wins + take wins, else random
+    const smart = smartMove(board);
+    if (smart !== -1 && Math.random() < 0.7) return smart;
+    return empty[Math.floor(Math.random() * empty.length)];
+  }
+  // Hard: minimax
+  return minimaxMove(board);
+}
+
+function smartMove(board) {
+  // Win if possible
+  for (const i of board.map((v,i) => v ? null : i).filter(i => i !== null)) {
+    const b = [...board]; b[i] = 'O';
+    if (checkWinner(b)?.winner === 'O') return i;
+  }
+  // Block player win
+  for (const i of board.map((v,i) => v ? null : i).filter(i => i !== null)) {
+    const b = [...board]; b[i] = 'X';
+    if (checkWinner(b)?.winner === 'X') return i;
+  }
+  // Center
+  if (!board[4]) return 4;
+  return -1;
+}
+
+function minimax(board, isMax, alpha, beta) {
+  const result = checkWinner(board);
+  if (result) {
+    if (result.winner === 'O') return 10;
+    if (result.winner === 'X') return -10;
+    return 0;
+  }
+  const empty = board.map((v,i) => v ? null : i).filter(i => i !== null);
+  if (isMax) {
+    let best = -Infinity;
+    for (const i of empty) {
+      const b = [...board]; b[i] = 'O';
+      best = Math.max(best, minimax(b, false, alpha, beta));
+      alpha = Math.max(alpha, best);
+      if (beta <= alpha) break;
+    }
+    return best;
+  } else {
+    let best = Infinity;
+    for (const i of empty) {
+      const b = [...board]; b[i] = 'X';
+      best = Math.min(best, minimax(b, true, alpha, beta));
+      beta = Math.min(beta, best);
+      if (beta <= alpha) break;
+    }
+    return best;
+  }
+}
+
+function minimaxMove(board) {
+  const empty = board.map((v,i) => v ? null : i).filter(i => i !== null);
+  let best = -Infinity, bestMove = empty[0];
+  for (const i of empty) {
+    const b = [...board]; b[i] = 'O';
+    const score = minimax(b, false, -Infinity, Infinity);
+    if (score > best) { best = score; bestMove = i; }
+  }
+  return bestMove;
+}
+
+// ── SOLO GAME ──────────────────────────────────────────────
+let soloBoard = Array(9).fill(null);
+let soloActive = true;
+let soloScores = { X: 0, draw: 0, O: 0 };
+
+function startSolo() { showScreen('screen-solo'); resetSolo(); }
+
+function renderSoloBoard(winLine) {
+  const el = document.getElementById('solo-board');
+  el.innerHTML = '';
+  soloBoard.forEach((val, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'cell' + (val ? ' ' + val.toLowerCase() : '') + (!soloActive || val ? ' disabled' : '');
+    if (winLine && winLine.includes(i)) cell.classList.add('win');
+    cell.textContent = val === 'X' ? '❌' : val === 'O' ? '⭕' : '';
+    if (!val && soloActive) cell.onclick = () => soloClick(i);
+    el.appendChild(cell);
+  });
+}
+
+function updateSoloScores() {
+  document.getElementById('solo-score-x').textContent    = `❌ Du: ${soloScores.X}`;
+  document.getElementById('solo-score-draw').textContent = `🤝 ${soloScores.draw}`;
+  document.getElementById('solo-score-o').textContent    = `🤖 Bot: ${soloScores.O}`;
+}
+
+function soloClick(i) {
+  if (!soloActive || soloBoard[i]) return;
+  soloBoard[i] = 'X';
+  const result = checkWinner(soloBoard);
+  if (result) { soloEnd(result); return; }
+  soloActive = false;
+  renderSoloBoard();
+  document.getElementById('solo-status').textContent = '';
+  document.getElementById('solo-thinking').textContent = '🤖 Botten tænker...';
+  setTimeout(() => {
+    const move = botMove(soloBoard);
+    if (move !== -1) soloBoard[move] = 'O';
+    const r2 = checkWinner(soloBoard);
+    document.getElementById('solo-thinking').textContent = '';
+    if (r2) { soloActive = true; soloEnd(r2); return; }
+    soloActive = true;
+    document.getElementById('solo-status').textContent = 'Din tur! ❌';
+    renderSoloBoard();
+  }, 400 + Math.random() * 300);
+}
+
+function soloEnd(result) {
+  let msg;
+  if (result.winner === 'X')    { msg = '🎉 Du vandt!'; soloScores.X++; }
+  else if (result.winner === 'O') { msg = '🤖 Botten vandt!'; soloScores.O++; }
+  else                            { msg = '🤝 Uafgjort!'; soloScores.draw++; }
+  document.getElementById('solo-status').textContent = msg;
+  soloActive = false;
+  renderSoloBoard(result.line);
+  updateSoloScores();
+}
+
+function resetSolo() {
+  soloBoard = Array(9).fill(null);
+  soloActive = true;
+  document.getElementById('solo-status').textContent = 'Din tur! ❌';
+  document.getElementById('solo-thinking').textContent = '';
+  renderSoloBoard();
+  updateSoloScores();
+}
+
+// ── DUO GAME ───────────────────────────────────────────────
+let duoBoard = Array(9).fill(null);
+let duoTurn = 'X';
+let duoActive = true;
+let duoScores = { X: 0, draw: 0, O: 0 };
+
+function startDuo() { showScreen('screen-duo'); resetDuo(); }
+
+function renderDuoBoard(winLine) {
+  const el = document.getElementById('duo-board');
+  el.innerHTML = '';
+  duoBoard.forEach((val, i) => {
+    const cell = document.createElement('div');
+    cell.className = 'cell' + (val ? ' ' + val.toLowerCase() : '') + (!duoActive || val ? ' disabled' : '');
+    if (winLine && winLine.includes(i)) cell.classList.add('win');
+    cell.textContent = val === 'X' ? '❌' : val === 'O' ? '⭕' : '';
+    if (!val && duoActive) cell.onclick = () => duoClick(i);
+    el.appendChild(cell);
+  });
+
+  // Highlight active score chip
+  document.getElementById('duo-score-x').classList.toggle('chip-active', duoTurn === 'X' && duoActive);
+  document.getElementById('duo-score-o').classList.toggle('chip-active', duoTurn === 'O' && duoActive);
+}
+
+function updateDuoScores() {
+  document.getElementById('duo-score-x').textContent    = `❌ Spiller 1: ${duoScores.X}`;
+  document.getElementById('duo-score-draw').textContent = `🤝 ${duoScores.draw}`;
+  document.getElementById('duo-score-o').textContent    = `⭕ Spiller 2: ${duoScores.O}`;
+}
+
+function duoClick(i) {
+  if (!duoActive || duoBoard[i]) return;
+  duoBoard[i] = duoTurn;
+  const result = checkWinner(duoBoard);
+  if (result) { duoEnd(result); return; }
+  duoTurn = duoTurn === 'X' ? 'O' : 'X';
+  const name = duoTurn === 'X' ? 'Spiller 1' : 'Spiller 2';
+  const sym  = duoTurn === 'X' ? '❌' : '⭕';
+  document.getElementById('duo-status').textContent = `${name}s tur! ${sym}`;
+  renderDuoBoard();
+}
+
+function duoEnd(result) {
+  let msg;
+  if (result.winner === 'X')    { msg = '🎉 Spiller 1 vandt!'; duoScores.X++; }
+  else if (result.winner === 'O') { msg = '🎉 Spiller 2 vandt!'; duoScores.O++; }
+  else                            { msg = '🤝 Uafgjort!'; duoScores.draw++; }
+  document.getElementById('duo-status').textContent = msg;
+  duoActive = false;
+  renderDuoBoard(result.line);
+  updateDuoScores();
+}
+
+function resetDuo() {
+  duoBoard = Array(9).fill(null);
+  duoTurn = 'X'; duoActive = true;
+  document.getElementById('duo-status').textContent = 'Spiller 1s tur! ❌';
+  renderDuoBoard();
+  updateDuoScores();
+}
+</script>
+</body>
+</html>

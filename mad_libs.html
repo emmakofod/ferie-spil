@@ -6,86 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Skøre historier 📖</title>
 <link rel="stylesheet" href="shared.css">
-<style>
-/* SCREENS */
-.screen { display: none; }
-.screen.active { display: block; }
-
-/* FILL-IN SCREEN */
-.fill-card {
-  background: var(--white); border-radius: 22px; border: 3px solid var(--dark);
-  box-shadow: 4px 4px 0 var(--dark); padding: 22px 18px;
-  max-width: 480px; margin: 0 auto 16px;
-}
-.story-title {
-  font-family: 'Fredoka One', cursive; font-size: 1.2rem;
-  color: var(--sea); margin-bottom: 16px; text-align: center;
-}
-.field-group { margin-bottom: 14px; }
-.field-label {
-  font-family: 'Fredoka One', cursive; font-size: 0.9rem;
-  color: var(--sea); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;
-}
-.field-input {
-  width: 100%; padding: 12px 14px; border-radius: 12px;
-  border: 3px solid var(--dark); font-family: 'Nunito', sans-serif;
-  font-size: 1rem; font-weight: 700; color: var(--dark);
-  background: white; outline: none;
-}
-.field-input:focus { border-color: var(--sea); box-shadow: 0 0 0 2px rgba(27,108,168,0.2); }
-
-.options-row {
-  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px;
-}
-.option-chip {
-  padding: 7px 14px; border-radius: 999px; border: 2px solid var(--dark);
-  background: white; font-family: 'Fredoka One', cursive; font-size: 0.85rem;
-  cursor: pointer; touch-action: manipulation;
-}
-.option-chip:active, .option-chip.selected { background: var(--sun); border-color: #c8a000; }
-
-.tell-btn {
-  display: block; width: 100%; max-width: 480px; margin: 0 auto;
-  padding: 18px; border-radius: 18px; border: 4px solid var(--dark);
-  background: var(--green); color: white;
-  font-family: 'Fredoka One', cursive; font-size: 1.3rem;
-  cursor: pointer; box-shadow: 4px 4px 0 var(--dark); touch-action: manipulation;
-}
-.tell-btn:active { transform: scale(0.95); }
-
-/* STORY SCREEN */
-.story-card {
-  background: var(--white); border-radius: 22px; border: 3px solid var(--dark);
-  box-shadow: 4px 4px 0 var(--dark); padding: 24px 20px;
-  max-width: 480px; margin: 0 auto 20px;
-  font-size: 1.05rem; font-weight: 700; line-height: 1.8; color: var(--dark);
-}
-.story-card .stitle {
-  font-family: 'Fredoka One', cursive; font-size: 1.4rem;
-  color: var(--sea); margin-bottom: 14px; text-align: center;
-}
-.highlight {
-  color: var(--coral); font-family: 'Fredoka One', cursive;
-  font-size: 1.1rem; text-decoration: underline wavy var(--sun);
-}
-
-.bottom-row { display: flex; gap: 10px; max-width: 480px; margin: 0 auto; }
-.bottom-btn {
-  flex: 1; padding: 16px 8px; border-radius: 16px; border: 3px solid var(--dark);
-  font-family: 'Fredoka One', cursive; font-size: 1rem; cursor: pointer;
-  box-shadow: 3px 3px 0 var(--dark); touch-action: manipulation;
-}
-.bottom-btn.again { background: var(--sun); }
-.bottom-btn.new { background: var(--sea); color: white; border-color: var(--deep); box-shadow: 3px 3px 0 var(--deep); }
-.bottom-btn:active { transform: scale(0.95); }
-</style>
 </head>
 <body>
 <a href="index.html" class="back-btn">← Hjem</a>
 <h1>📖 Skøre historier!</h1>
 <p class="sub">Udfyld ordene — så læser vi historien højt!</p>
 
-<!-- FILL-IN SCREEN -->
 <div id="screen-fill" class="screen active">
   <div class="fill-card">
     <div class="story-title" id="fill-title"></div>
@@ -94,7 +20,6 @@
   <button class="tell-btn" onclick="showStory()">📖 Læs historien!</button>
 </div>
 
-<!-- STORY SCREEN -->
 <div id="screen-story" class="screen">
   <div class="story-card" id="story-output"></div>
   <div class="bottom-row">
@@ -106,59 +31,202 @@
 <script>
 const STORIES = [
   {
-    title: '🚢 Turen til Bornholm',
+    title: '🚗 Familien på bilferie',
     fields: [
-      { key: 'dyr', label: '🐾 Et dyr', hint: 'fx haj, elefant, kat', options: ['haj','elefant','kat','drage','pingvin'] },
-      { key: 'mad', label: '🍕 En slags mad', hint: 'fx pizza, spaghetti, is', options: ['pizza','spaghetti','is','pandekager','sushi'] },
-      { key: 'farve', label: '🎨 En farve', hint: 'fx lilla, neongrøn', options: ['lilla','neongrøn','orange','pink','turkis'] },
-      { key: 'navn', label: '👤 Et navn', hint: 'fx Bamsefar, Kong Gurk', options: ['Bamsefar','Kong Gurk','Fru Boble','Kaptajn Snor'] },
-      { key: 'tal', label: '🔢 Et tal', hint: 'fx 7, 100, 3000', options: ['7','42','100','3000','11'] },
+      { key: 'farve',    label: '🎨 Farve',      hint: 'fx rød, neongrøn',           options: ['rød','neongrøn','lyserød','brun','lilla'] },
+      { key: 'tal',      label: '🔢 Tal',         hint: 'fx 3, 99, 1000',             options: ['3','7','99','1000','halvanden'] },
+      { key: 'koretoj',  label: '🚗 Køretøj',     hint: 'fx raket, traktor',          options: ['raket','karet','traktor','skateboard','ubåd'] },
+      { key: 'slægt1',   label: '👨 Familiemedlem',hint: 'fx mormor, fætter',         options: ['mormor','fætter','onkel','lillebror','bedstefar'] },
+      { key: 'slægt2',   label: '👩 Familiemedlem',hint: 'fx faster, søster',         options: ['faster','søster','tante','lillesøster','nabo'] },
+      { key: 'mad',      label: '🍕 Mad',          hint: 'fx løg, blæksprutte',       options: ['løg','blæksprutte','spegepølse','ål','rosenkål'] },
+      { key: 'frugt',    label: '🍎 Frugt',        hint: 'fx durian, citron',         options: ['durian','citron','kiwi','avocado','figen'] },
+      { key: 'drik',     label: '🥤 Drik',         hint: 'fx sojamælk, saltlage',     options: ['sojamælk','leverpostejjuice','saltlage','pruttevand','kamillete'] },
+      { key: 'verb',     label: '🏃 Handling',     hint: 'fx trampe, nynne',          options: ['trampe','nynne','gøe','prutte','hikke'] },
+      { key: 'ting1',    label: '🎒 Ting',         hint: 'fx nissehue, badeklap',     options: ['nissehue','badeklap','gummistøvle','snorkel','paraplyen'] },
+      { key: 'ting2',    label: '🎒 Anden ting',   hint: 'fx gardinerne, et telt',    options: ['gardinerne','et telt','en hjelm','mormors strikkepind','et flagstang'] },
+      { key: 'spil',     label: '🎮 Spil',         hint: 'fx Ludo, Bingo',            options: ['Ludo','Bingo','huskespillet','prikspillet','Uno'] },
+      { key: 'ting3',    label: '🪸 Ting på stranden', hint: 'fx sneglehuse, tang',  options: ['sneglehuse','tang','krabbekløer','sandslotte','glasskår'] },
     ],
-    build: (v) => `Der var engang en <span class="highlight">${v.farve}</span> <span class="highlight">${v.dyr}</span> der hed <span class="highlight">${v.navn}</span>. <span class="highlight">${v.navn}</span> elskede <span class="highlight">${v.mad}</span> over alt andet i verden — og spiste det <span class="highlight">${v.tal}</span> gange om dagen! En dag besluttede <span class="highlight">${v.navn}</span> at tage med færgen til Bornholm. Men på færgen opdagede alle passagererne at <span class="highlight">${v.navn}</span> havde spist AL maden i restauranten! Kaptajnen råbte: "Bare rolig! Vi finder mere <span class="highlight">${v.mad}</span> på Bornholm!" Og det gjorde de. Slutningen. 🎉`,
+    build: (v) => `Min familie kørte til <span class="highlight">${v.farve}</span> Strand — <span class="highlight">${v.tal}</span> timer væk. Vi kørte i en <span class="highlight">${v.koretoj}</span> med <span class="highlight">${v.slægt1}</span> og <span class="highlight">${v.slægt2}</span>. Mor pakkede en køletaske med <span class="highlight">${v.mad}</span>-sandwicher, <span class="highlight">${v.frugt}</span> og <span class="highlight">${v.drik}</span>. De sagde vi skulle huske at <span class="highlight">${v.verb}</span> og have <span class="highlight">${v.ting1}</span> og <span class="highlight">${v.ting2}</span> på, så vi ikke fik solstik. Undervejs spillede vi <span class="highlight">${v.spil}</span> og "Tæl alle <span class="highlight">${v.ting3}</span>". Jeg kan ikke vente med at komme ud! 🌊`,
   },
   {
-    title: '🏖️ Stranden er mærkelig i dag',
+    title: '☀️ Det bedste jeg lavede i sommerferien',
     fields: [
-      { key: 'dyr', label: '🐾 Et vanddyr', hint: 'fx blæksprutte, havhest', options: ['blæksprutte','havhest','kæmpe krabbe','havmand','tun'] },
-      { key: 'ting', label: '🎒 En ting man kan finde på stranden', hint: 'fx paraply, gammel sko', options: ['paraply','gammel sko','trampolin','gammel skat','gummibåd'] },
-      { key: 'lyd', label: '🔊 En sjov lyd', hint: 'fx BLOP, WUUUSH, SLUUUP', options: ['BLOP','WUUUSH','SLUUUP','BOING','GLUGG'] },
-      { key: 'adj', label: '✨ Et beskrivende ord', hint: 'fx klistret, fnugget, lysende', options: ['klistret','fnugget','lysende','slimet','glinsende'] },
-      { key: 'navn', label: '👤 Et navn', hint: 'fx Prinsesse Guf, Hr. Bøvs', options: ['Prinsesse Guf','Hr. Bøvs','Fru Vims','Kaptajn Klat','Lord Bums'] },
+      { key: 'sted',     label: '📍 Sted',         hint: 'fx månen, Grønland',        options: ['månen','Grønland','bunden af havet','et bjerg','kloakken'] },
+      { key: 'verb1',    label: '🏃 Handling',      hint: 'fx svæve, kravle',          options: ['svæve','kravle','rulle','springe','tunnelgrave'] },
+      { key: 'koretoj',  label: '🚗 Køretøj',       hint: 'fx drage, helikopter',      options: ['drage','helikopter','traktor','robåd','segway'] },
+      { key: 'tal',      label: '🔢 Tal',           hint: 'fx 4, 17, 3000',            options: ['4','17','3000','halvtreds','én'] },
+      { key: 'dyr1',     label: '🐾 Dyr (flertal)', hint: 'fx flodheste, pingviner',   options: ['flodheste','pingviner','krokodiller','næsehorn','giraffer'] },
+      { key: 'verb2',    label: '🏃 Dyr-handling',  hint: 'fx danser, hikker',         options: ['danser','hikker','sover','graver','løber baglæns'] },
+      { key: 'noun1',    label: '🏠 Et sted',       hint: 'fx biografen, skuret',      options: ['biografen','skuret','tanklægens venteværelse','møllen','stalden'] },
+      { key: 'adj',      label: '✨ Ord',            hint: 'fx tilsumpet, blinkende',   options: ['tilsumpet','blinkende','fedtet','muggen','klistret'] },
+      { key: 'mad',      label: '🍕 Mad',            hint: 'fx blæksprutte, sild',      options: ['blæksprutte','sild','leverpostej','aubergine','ål'] },
+      { key: 'dyr2',     label: '🐾 Dyr (flertal)', hint: 'fx geder, lemminger',       options: ['geder','lemminger','måger','rotter','vandmænd'] },
+      { key: 'verb3',    label: '🏃 Handling',       hint: 'fx sprang, kravlede',       options: ['sprang','kravlede','rullede','eksploderede','forvandlede sig'] },
     ],
-    build: (v) => `Det var en dejlig dag på stranden. Pludselig lød der et højt "<span class="highlight">${v.lyd}</span>!" fra havet. En <span class="highlight">${v.adj}</span> <span class="highlight">${v.dyr}</span> dukkede op fra bølgerne og sagde: "Undskyld, har nogen set min <span class="highlight">${v.ting}</span>?" Alle på stranden var chokerede — undtagen <span class="highlight">${v.navn}</span> som roligt sagde: "Jo, jeg sidder på den!" <span class="highlight">${v.navn}</span> rejste sig op, og der lå den — helt <span class="highlight">${v.adj}</span>. <span class="highlight">${v.dyr}</span>en sagde "<span class="highlight">${v.lyd}</span>!" igen og forsvandt ned i bølgerne. <span class="highlight">${v.navn}</span> vinkede farvel. 🌊`,
+    build: (v) => `Sidste sommer tog min familie og jeg til <span class="highlight">${v.sted}</span> på ferie. Vi <span class="highlight">${v.verb1}</span>-de i en <span class="highlight">${v.koretoj}</span>, og det tog <span class="highlight">${v.tal}</span> dage at komme derhen. Jeg tog masser af billeder af <span class="highlight">${v.dyr1}</span> der <span class="highlight">${v.verb2}</span> i <span class="highlight">${v.noun1}</span>. Vi kørte gennem et <span class="highlight">${v.adj}</span> område og der var <span class="highlight">${v.dyr2}</span> og <span class="highlight">${v.dyr1}</span> der <span class="highlight">${v.verb3}</span> hele vejen rundt om os! Om aftenen spiste vi <span class="highlight">${v.adj}</span> <span class="highlight">${v.mad}</span>. Jeg kan ikke vente med at vise mine billeder til alle! 📸`,
   },
   {
-    title: '🌲 Den mystiske skov på Bornholm',
+    title: '👻 Min bedste ven er et spøgelse',
     fields: [
-      { key: 'dyr', label: '🐾 Et skovdyr', hint: 'fx ræv, bjørn, enhjørning', options: ['ræv','bjørn','enhjørning','ulv','kæmpe snegl'] },
-      { key: 'farve', label: '🎨 En farve', hint: 'fx knallgul, mørkelilla', options: ['knallgul','mørkelilla','neonrød','guldglinsende','turkis'] },
-      { key: 'mad', label: '🍄 Noget man kan finde i skoven', hint: 'fx svampe, bær, kogler', options: ['svampe','bær','kogler','mosklumper','trærødder'] },
-      { key: 'verb', label: '🏃 Noget man kan gøre (et udsagnsord)', hint: 'fx hoppe, synge, baglæns gå', options: ['hoppe','synge','baglæns gå','spinde rundt','brøle'] },
-      { key: 'tal', label: '🔢 Et meget stort tal', hint: 'fx 1 million, 9999', options: ['1 million','9999','88','uendelig','5 milliarder'] },
+      { key: 'adj1',     label: '✨ Ord',           hint: 'fx mærkeligt, glat',        options: ['mærkeligt','glat','fnugget','sjovt','vildt'] },
+      { key: 'adj2',     label: '✨ Andet ord',     hint: 'fx klistret, blinkende',    options: ['klistret','blinkende','fedtet','slimet','gennemsigtigt'] },
+      { key: 'tal1',     label: '🔢 Klassetrin',   hint: 'fx 1., 3., 7.',             options: ['1.','2.','3.','4.','5.'] },
+      { key: 'verb1',    label: '🏃 Handling',      hint: 'fx pudse, feje',            options: ['pudse','feje','vaske','male','polere'] },
+      { key: 'rum',      label: '🏠 Rum i skolen',  hint: 'fx biblioteket, kantinen',  options: ['biblioteket','kantinen','gymnastiksalen','toilettet','direktørens kontor'] },
+      { key: 'navn',     label: '👤 Navn',          hint: 'fx Sigrid, Gunnar',         options: ['Sigrid','Gunnar','Valdemar','Astrid','Knud'] },
+      { key: 'tal2',     label: '🔢 Tal',           hint: 'fx 8, 100, 3000',           options: ['8','100','3000','42','11'] },
+      { key: 'farve',    label: '🎨 Farve',         hint: 'fx neongrøn, lilla',        options: ['neongrøn','lilla','gylden','skinnende hvid','elektrisk blå'] },
+      { key: 'adv',      label: '✨ Ord',            hint: 'fx vildt, enormt',          options: ['vildt','enormt','pinligt','ekstremt','forbløffende'] },
+      { key: 'adj3',     label: '✨ Ord',            hint: 'fx rodet, gammelt',         options: ['rodet','gammelt','klistret','besværligt','farverigt'] },
+      { key: 'verb2',    label: '🏃 Handling',       hint: 'fx gemme sig, flyve',       options: ['gemme sig','flyve','forsvinde','gå igennem vægge','svæve'] },
     ],
-    build: (v) => `Dybt inde i Bornholms <span class="highlight">${v.farve}</span> skov boede en <span class="highlight">${v.dyr}</span>. Hvert eneste morgen stod <span class="highlight">${v.dyr}</span>en op og begyndte at <span class="highlight">${v.verb}</span> rundt om alle træerne — <span class="highlight">${v.tal}</span> gange! Bagefter spiste den <span class="highlight">${v.mad}</span> til morgenmad. En dag kom to turister ind i skoven og så det. "Hvad laver du?!" råbte de. <span class="highlight">${v.dyr}</span>en svarede: "Jeg træner! Om <span class="highlight">${v.tal}</span> dage skal jeg deltage i VM i at <span class="highlight">${v.verb}</span>!" Turisterne støttede den. <span class="highlight">${v.dyr}</span>en vandt guld. 🏆`,
+    build: (v) => `Det lyder måske <span class="highlight">${v.adj1}</span>, men min bedste ven er et spøgelse. Vi mødtes i <span class="highlight">${v.tal1}</span> klasse mens de <span class="highlight">${v.verb1}</span>-de <span class="highlight">${v.rum}</span>. Spøgelsets navn er <span class="highlight">${v.navn}</span> og de var <span class="highlight">${v.tal2}</span> år da de døde. Ingen kan se min ven undtagen mig. De har <span class="highlight">${v.farve}</span> hår og er <span class="highlight">${v.adv}</span> <span class="highlight">${v.adj2}</span>. Tøjet er altid <span class="highlight">${v.adj3}</span>. Det er <span class="highlight">${v.adj1}</span> at have en usynlig ven — de vinder altid til <span class="highlight">${v.verb2}</span>-og-søg! 👻`,
   },
   {
-    title: '🍦 Den magiske isbutik',
+    title: '🏰 Prinsessen og dværgene',
     fields: [
-      { key: 'smag', label: '🍦 En mærkelig is-smag', hint: 'fx løg-is, sko-is, dinosaur-is', options: ['løg-is','sko-is','dinosaur-is','pizza-is','bæ-is'] },
-      { key: 'dyr', label: '🐾 Et dyr', hint: 'fx giraf, kanin, krokodille', options: ['giraf','kanin','krokodille','flodhest','bæver'] },
-      { key: 'adj', label: '✨ Et ord der beskriver noget mærkeligt', hint: 'fx klæbrig, boblet, blinkende', options: ['klæbrig','boblet','blinkende','springende','summende'] },
-      { key: 'sted', label: '📍 Et sted', hint: 'fx månen, havbunden, Grønland', options: ['månen','havbunden','Grønland','en sky','indersiden af en vulkan'] },
-      { key: 'navn', label: '👤 Et sjovt navn', hint: 'fx Iskongen, Fru Vaffel', options: ['Iskongen','Fru Vaffel','Hr. Flødebolle','Prinsesse Softice','Mester Kugle'] },
+      { key: 'adj1',     label: '✨ Ord',           hint: 'fx magisk, klæbrig',        options: ['magisk','klæbrig','fnugget','blinkende','summende'] },
+      { key: 'navn',     label: '👤 Navn',          hint: 'fx Snekugle, Is-Marie',     options: ['Snekugle','Is-Marie','Rosenbusk','Solskin','Brombær'] },
+      { key: 'tal',      label: '🔢 Tal',           hint: 'fx 3, 9, 100',              options: ['3','9','100','17','halvtreds'] },
+      { key: 'slægt',    label: '👩 Slægtning',     hint: 'fx mormor, søster',         options: ['mormor','søster','tante','nabokonen','bedstemor'] },
+      { key: 'sted1',    label: '📍 Sted',          hint: 'fx bageriet, kloakken',     options: ['bageriet','kloakken','skuret','stalden','biblioteket'] },
+      { key: 'sted2',    label: '📍 Andet sted',    hint: 'fx skoven, mosen',          options: ['skoven','mosen','ørkenen','et rodehul','gulvtæppet'] },
+      { key: 'verb',     label: '🏃 Handling',       hint: 'fx støve, pudse, feje',     options: ['støve','pudse','feje','vaske op','tælle ærter'] },
+      { key: 'ting',     label: '🎒 Ting (flertal)', hint: 'fx strømper, kasser',       options: ['strømper','kasser','osteskiver','kartofler','støvler'] },
+      { key: 'adj2',     label: '✨ Trylleord',      hint: 'fx grødet, muggen',         options: ['grødet','muggen','snævert','klistret','stinkende'] },
+      { key: 'person',   label: '🧑 En person',      hint: 'fx postbudet, en bager',    options: ['postbudet','en bager','en ridder','naboen','en klovn'] },
+      { key: 'adv',      label: '✨ -ligt ord',       hint: 'fx frygteligt, herligt',    options: ['frygteligt','herligt','forvirrende','utilfredsstillende','besynderligt'] },
     ],
-    build: (v) => `På Bornholm lå der en isbutik der hed "Det <span class="highlight">${v.adj}</span> Ishjørne" og ejeren hed <span class="highlight">${v.navn}</span>. Den mest populære is dér var <span class="highlight">${v.smag}</span> — selvom alle syntes det lød mærkeligt! En dag kom en <span class="highlight">${v.adj}</span> <span class="highlight">${v.dyr}</span> ind og bestilte en kugle. Den tog en bid og råbte: "DETTE SMAGER AF <span class="highlight">${v.sted}</span>!" <span class="highlight">${v.navn}</span> smilede og sagde: "Præcis! Opskriften er fra <span class="highlight">${v.sted}</span>!" <span class="highlight">${v.dyr}</span>en køgte <span class="highlight">${v.smag}</span> hver dag resten af sommerferien. 🍦`,
+    build: (v) => `Der kommer snart en ny og <span class="highlight">${v.adj1}</span> prinsessefilm! Den handler om Sne-<span class="highlight">${v.navn}</span> og de <span class="highlight">${v.tal}</span> dværge. Sne-<span class="highlight">${v.navn}</span> er en prinsesse hvis skønhed truer hendes <span class="highlight">${v.slægt}</span>, dronningen. Hun tvinges til at flygte fra <span class="highlight">${v.sted1}</span> og gemmer sig i <span class="highlight">${v.sted2}</span>. Der opdager hun dværgene som <span class="highlight">${v.verb}</span>-er i deres <span class="highlight">${v.ting}</span>. Dronningen kaster en <span class="highlight">${v.adj2}</span> trylleformular. Dværgene passer på hende indtil den <span class="highlight">${v.adj1}</span> <span class="highlight">${v.person}</span> redder hende, og de lever <span class="highlight">${v.adv}</span> lykkelige! 👑`,
   },
   {
-    title: '🚗 Den lange biltur',
+    title: '🏠 Det hjemsøgte hus på min gade',
     fields: [
-      { key: 'dyr', label: '🐾 Et dyr der ikke burde sidde i en bil', hint: 'fx næsehorn, hval, struds', options: ['næsehorn','hval','struds','flodhest','mammut'] },
-      { key: 'sang', label: '🎵 En sang eller melodi', hint: 'fx "Hej Matematik", "Baby Shark"', options: ['Hej Matematik','Baby Shark','En elefant kom marcherende','Let It Go','Bamse og Kylling'] },
-      { key: 'mad', label: '🍕 Rejsemad', hint: 'fx sandwicher, chips, spaghetti', options: ['sandwicher','chips','spaghetti','pandekager','jordbær'] },
-      { key: 'adj', label: '✨ Beskrivende ord', hint: 'fx gigantisk, ultrakornet, duftende', options: ['gigantisk','ultrakornet','duftende','blinkende','hoppende'] },
-      { key: 'tal', label: '🔢 Hvor mange kilometer?', hint: 'fx 5, 1000, 3 millioner', options: ['5','1000','3 millioner','99','halvanden'] },
+      { key: 'noun1',    label: '🏠 Del af en gade',  hint: 'fx hjørnet, bakken',      options: ['hjørnet','bakken','mosen','klitterne','sumpen'] },
+      { key: 'adv',      label: '✨ -ligt ord',        hint: 'fx vildt, ekstremt',      options: ['vildt','ekstremt','fuldstændigt','sindssygt','utroligt'] },
+      { key: 'efternavn',label: '👤 Efternavn',        hint: 'fx Sørensen, Holm',       options: ['Sørensen','Holm','Bundgaard','Krogsgaard','Mikkelsen'] },
+      { key: 'adj1',     label: '✨ Ord',              hint: 'fx muggen, skummel',      options: ['muggen','skummel','klistret','blinkende','råddent'] },
+      { key: 'tal',      label: '🔢 Antal år',         hint: 'fx 7, 300, 1000',         options: ['7','300','1000','42','halvtreds'] },
+      { key: 'adj2',     label: '✨ Ord',              hint: 'fx uhyggeligt, fedtet',   options: ['uhyggeligt','fedtet','slimet','fnugget','grødet'] },
+      { key: 'ting1',    label: '🎒 Ting (flertal)',   hint: 'fx orm, flagermus',       options: ['orm','flagermus','skraldespande','heksekedler','gyselige puder'] },
+      { key: 'mad',      label: '🍕 Mad',              hint: 'fx rådden ost, sild',     options: ['rådden ost','sild','leverpostej','muggen brød','gammel grød'] },
+      { key: 'fornavn',  label: '👤 Fornavn',          hint: 'fx Gunnar, Sigrid',       options: ['Gunnar','Sigrid','Valdemar','Astrid','Knud'] },
+      { key: 'verb1',    label: '🏃 Handling (datid)', hint: 'fx krøb, faldt, svævede', options: ['krøb','faldt','svævede','tunnelgravede','rullede'] },
+      { key: 'verb2',    label: '🏃 Handling (datid)', hint: 'fx kom, gik, fløj',       options: ['kom','gik','kravlede','hoppede','rullede'] },
+      { key: 'følelse',  label: '❤️ Følelse',          hint: 'fx bange, fnisende',      options: ['bange','glade','fnisende','nysgerrige','forvirrede'] },
+      { key: 'verb3',    label: '🏃 Handling',         hint: 'fx løbe, cykle, hoppe',   options: ['løbe','cykle','hoppe','svæve','krybe'] },
+      { key: 'adj4',     label: '✨ Ord',              hint: 'fx uhyggeligt, sjovt',    options: ['uhyggeligt','sjovt','tilsumpet','sindsygt','fascinerende'] },
     ],
-    build: (v) => `Familie Madsen var på vej til Bornholm da de opdagede at der sad et <span class="highlight">${v.adj}</span> <span class="highlight">${v.dyr}</span> på bagsædet. "Hvornår kom du ind?" spurgte mor. "<span class="highlight">${v.tal}</span> kilometer siden" svarede <span class="highlight">${v.dyr}</span>en. Far sagde roligt: "Nå, vil du have noget <span class="highlight">${v.mad}</span>?" <span class="highlight">${v.dyr}</span>en sagde ja tak og begyndte at synge <span class="highlight">${v.sang}</span> helt fra starten. Alle sang med — også <span class="highlight">${v.dyr}</span>en der faktisk havde en rigtig flot stemme. Det var den bedste bilferie nogensinde. 🚗`,
+    build: (v) => `Der er et hus på <span class="highlight">${v.noun1}</span> af min gade der er <span class="highlight">${v.adv}</span> hjemsøgt. Det er det gamle <span class="highlight">${v.efternavn}</span>-hus der har stået <span class="highlight">${v.adj1}</span> i <span class="highlight">${v.tal}</span> år. Jeg kan se det er <span class="highlight">${v.adj2}</span> fordi der er <span class="highlight">${v.ting1}</span> udenfor, og det lugter af gammel <span class="highlight">${v.mad}</span>. Jeg har hørt at en kid der hed <span class="highlight">${v.fornavn}</span> <span class="highlight">${v.verb1}</span> derind og aldrig <span class="highlight">${v.verb2}</span> ud igen. Mine venner og jeg er <span class="highlight">${v.følelse}</span> over at <span class="highlight">${v.verb3}</span> forbi det fordi det er så <span class="highlight">${v.adj4}</span>. 🏚️`,
+  },
+  {
+    title: '👾 Er der et monster i mit værelse?',
+    fields: [
+      { key: 'verb1',    label: '🏃 Handling',        hint: 'fx hoppe, synge, rulle',  options: ['hoppe','synge','rulle','slæbe sig','trampe'] },
+      { key: 'verb2',    label: '🏃 Handling',        hint: 'fx høre, dufte, mærke',   options: ['høre','dufte','mærke','se','fornemme'] },
+      { key: 'adj1',     label: '✨ Ord',             hint: 'fx klistret, stinkende',  options: ['klistret','stinkende','blinkende','fnugget','summende'] },
+      { key: 'noun1',    label: '🎒 Ting',            hint: 'fx en kage, en regnorm',  options: ['en kage','en regnorm','en gummiand','et ostehoved','en gammel sok'] },
+      { key: 'verb3',    label: '🏃 Handling (-er)',  hint: 'fx danser, hikker',       options: ['danser','hikker','sover','brøler','graver'] },
+      { key: 'adj2',     label: '✨ Ord',             hint: 'fx skræmmende, sjovt',    options: ['skræmmende','sjovt','pinligt','forbløffende','underligt'] },
+      { key: 'slægt',    label: '👨 Slægtning',       hint: 'fx morfar, fætteren',     options: ['morfar','fætteren','mormor','onklen','naboen'] },
+      { key: 'ting_pl',  label: '🎒 Ting (flertal)',  hint: 'fx sokker, pandekager',   options: ['sokker','pandekager','kager','sko','gafler'] },
+      { key: 'møbel',    label: '🛋️ Møbel',          hint: 'fx sengen, skrivebordet', options: ['sengen','skrivebordet','bogreolen','garderoben','tæppet'] },
+      { key: 'monster1', label: '👾 Slags monster',   hint: 'fx en zombie, en trold',  options: ['en zombie','en trold','en heks','en drage','et spøgelse'] },
+      { key: 'monster2', label: '👾 Andet monster',   hint: 'fx et muldvarpemonster',  options: ['et muldvarpemonster','en blækspruttetrold','en snegelheks','en leverpostejdrage','en gummibandpiranha'] },
+    ],
+    build: (v) => `Hver aften inden jeg skal <span class="highlight">${v.verb1}</span>, kan jeg <span class="highlight">${v.verb2}</span> lyde i mit skab. Det lyder som om en <span class="highlight">${v.adj1}</span> <span class="highlight">${v.noun1}</span> <span class="highlight">${v.verb3}</span> derinde — og det er så <span class="highlight">${v.adj2}</span>! Når jeg råber på <span class="highlight">${v.slægt}</span>, hører de aldrig noget. Så slukker jeg lyset og prøver at <span class="highlight">${v.verb1}</span>. Men så begynder <span class="highlight">${v.ting_pl}</span> at bevæge sig under <span class="highlight">${v.møbel}</span>. Er det <span class="highlight">${v.monster1}</span> eller måske endda <span class="highlight">${v.monster2}</span>? 😱`,
+  },
+  {
+    title: '🐾 Mit kæledyr er stjernen',
+    fields: [
+      { key: 'navn',     label: '👤 Navn (person)',   hint: 'fx Gurli, Svend',         options: ['Gurli','Svend','Valborg','Orla','Egon'] },
+      { key: 'pronomen', label: '🧑 Han/hun',         hint: 'fx han, hun',              options: ['han','hun'] },
+      { key: 'by',       label: '📍 By',              hint: 'fx Odense, Vejle',         options: ['Odense','Vejle','Viborg','Horsens','Holstebro'] },
+      { key: 'butik',    label: '🏪 Slags butik',     hint: 'fx en fiskebutik, isbar',  options: ['en fiskebutik','en isbar','en rideskole','en bowlinghal','et postkontor'] },
+      { key: 'adj',      label: '✨ Ord',             hint: 'fx klistret, fnugget',     options: ['klistret','fnugget','lysende','krøllet','stinkende'] },
+      { key: 'farve',    label: '🎨 Farve',           hint: 'fx neonrød, lilla',        options: ['neonrød','lilla','skinnende guld','elektrisk blå','neongul'] },
+      { key: 'kælenavn', label: '💕 Navn til dyr',    hint: 'fx Pøj, Klumsen',         options: ['Pøj','Klumsen','Nuttemut','Bøvso','Pjaskeren'] },
+      { key: 'verb1',    label: '🏃 Handling (datid)',hint: 'fx væltede, snusede',      options: ['væltede','snusede','gnavede','hoppede på','dryssede ned på'] },
+      { key: 'stinkting',label: '💧 Stinkende væske', hint: 'fx fiskelage, surt mælk', options: ['fiskelage','surt mælk','gammel juice','havvand','leverpostejsaft'] },
+      { key: 'tøj',      label: '👕 Tøj',             hint: 'fx en badehætte, vanter', options: ['en badehætte','vanter','svømmefødder','et forklæde','en regnjakke'] },
+      { key: 'sted',     label: '📍 Sted i byen',     hint: 'fx havnen, parken',       options: ['havnen','torvets fontæne','skateboardbanen','parken','gågaden'] },
+      { key: 'legetoj',  label: '🧸 Legetøj',         hint: 'fx en pind, en bold',     options: ['en pind','en gummibold','en gammel sok','en tøjbamse','en plastikgaffel'] },
+      { key: 'mad',      label: '🍕 Mad',              hint: 'fx fritters, vafler',     options: ['fritters','vafler','fiskepinde','pandekager','hvedemel'] },
+    ],
+    build: (v) => `Hej! Jeg hedder <span class="highlight">${v.navn}</span>. Jeg bor i <span class="highlight">${v.by}</span> med min ejer. <span class="highlight">${v.pronomen}</span> arbejder i <span class="highlight">${v.butik}</span>. Jeg er et <span class="highlight">${v.adj}</span> kæledyr med <span class="highlight">${v.farve}</span> pels og mit navn er <span class="highlight">${v.kælenavn}</span>. En dag <span class="highlight">${v.verb1}</span> jeg ned over noget <span class="highlight">${v.stinkting}</span>. Det lugtede af <span class="highlight">${v.tøj}</span>! Jeg listede ud ad døren og ned til <span class="highlight">${v.sted}</span>. Jeg fandt <span class="highlight">${v.legetoj}</span> og bed fat i den. Nogle mennesker på en picnic fik ondt af mig og gav mig <span class="highlight">${v.mad}</span>. Men så dukkede min ejer op og kiggede strengt på mig. Vi gik hjem med halen hængende. 🐾`,
+  },
+  {
+    title: '🌴 En rigtig god ferie',
+    fields: [
+      { key: 'adj1',     label: '✨ Ord',             hint: 'fx fjollet, blinkende',   options: ['fjollet','blinkende','fnugget','stinkende','klistret'] },
+      { key: 'adj2',     label: '✨ Andet ord',       hint: 'fx sær, tilsumpet',       options: ['sær','tilsumpet','muggen','grødet','snøvlende'] },
+      { key: 'noun1',    label: '🏞️ Naturting',       hint: 'fx en flod, en bjergkæde',options: ['en flod','en bjergkæde','en kaktus','et klipperev','en mose'] },
+      { key: 'noun2',    label: '🏞️ Naturting',       hint: 'fx en vulkan, en jungle', options: ['en vulkan','en jungle','en gletsjer','en ørken','et koralrev'] },
+      { key: 'spil',     label: '🎮 Spil',            hint: 'fx klejne-kast, reb-kast',options: ['klejne-kast','snurrumle','mudder-hop','palmeklatring','reb-kast'] },
+      { key: 'ting_pl',  label: '🎒 Ting at fange',  hint: 'fx krabber, sommerfugle', options: ['sommerfugle','krabber','guldsmede','regnorme','søheste'] },
+      { key: 'verb1',    label: '🏃 Handling',        hint: 'fx trampe, synge',        options: ['trampe','synge','snurre rundt','hikke','rulle'] },
+      { key: 'verb2',    label: '🏃 Handling',        hint: 'fx svæve, galoppere',     options: ['svæve','galoppere','dykke ned','snurre','danse'] },
+      { key: 'noun3',    label: '🏠 Et sted',         hint: 'fx en dansekælder, en bio',options: ['en dansekælder','en biograf','en bondegård','et marked','en labyrint'] },
+      { key: 'adj3',     label: '✨ Ord',             hint: 'fx forvirrende, muggen',  options: ['forvirrende','muggen','tilsumpet','fnugget','grødet'] },
+      { key: 'mad',      label: '🍕 Mad',             hint: 'fx blæksprutte, snegle',  options: ['blæksprutte','snegle','leverpostej','sild i lage','gammel ost'] },
+      { key: 'noun4',    label: '🎒 Ting at samle',   hint: 'fx havskaller, pinde',    options: ['havskaller','pinde','kampe sten','søpindsvin','muslingeskaller'] },
+      { key: 'noun5',    label: '🎒 Anden ting',      hint: 'fx søstjerner, kogler',   options: ['søstjerner','kogler','glasskår','tandstikker','osteskiver'] },
+    ],
+    build: (v) => `En ferie er når man tager til et <span class="highlight">${v.adj1}</span> sted med sin <span class="highlight">${v.adj2}</span> familie. Man tager som regel et sted nær <span class="highlight">${v.noun1}</span> eller op på <span class="highlight">${v.noun2}</span>. Det bedste feriested er et sted hvor man kan spille <span class="highlight">${v.spil}</span> eller fange <span class="highlight">${v.ting_pl}</span>. Jeg bruger min tid på at <span class="highlight">${v.verb1}</span> og <span class="highlight">${v.verb2}</span>. Om aftenen tog vi hen til <span class="highlight">${v.noun3}</span> og hørte <span class="highlight">${v.adj3}</span> musik mens vi spiste <span class="highlight">${v.adj3}</span> <span class="highlight">${v.mad}</span>. Vi samlede <span class="highlight">${v.noun4}</span> og <span class="highlight">${v.noun5}</span> på stranden! 🌴`,
+  },
+  {
+    title: '🚀 Opfinderen der gik galt',
+    fields: [
+      { key: 'ting1',    label: '🔧 Opfindelse',      hint: 'fx en elektrisk kasket',  options: ['en elektrisk kasket','en selvkørende regnorm','en dampende paryk','en blinkende snude','en syngende badehætte'] },
+      { key: 'ting2',    label: '🔧 Værktøj',         hint: 'fx en kartoffelskræller', options: ['en kartoffelskræller','en sigte','et kæmpe ske','en spritpenne','en skrue'] },
+      { key: 'slægt',    label: '👨 Slægtning',       hint: 'fx morfars, tantes',      options: ['morfars','tantes','naboens','bagerens','cykelreparatørens'] },
+      { key: 'ting3_pl', label: '🔧 Materialer',      hint: 'fx plastikskeer, ledninger',options: ['plastikskeer','ledninger','vatpinde','tandstikkere','gummibånd'] },
+      { key: 'lyd',      label: '🔊 Råb',             hint: 'fx WUUUSH, BLOP',         options: ['WUUUSH','BLOP','KABOOM','SPLAT','BZZZT'] },
+      { key: 'verb1',    label: '🏃 Handling (-ende)', hint: 'fx hoppende, syngende',  options: ['hoppende','syngende','snurrende','trampe','hikke'] },
+      { key: 'adj',      label: '✨ Ord',             hint: 'fx klistret, muggen',     options: ['klistret','muggen','tilsumpet','grødet','slimet'] },
+      { key: 'tal',      label: '🔢 Tal (stort)',     hint: 'fx 3 millioner, 99',      options: ['3 millioner','99','halvtreds','en halv milliard','17'] },
+      { key: 'navn',     label: '👤 Navn',            hint: 'fx Kong Glimmer, Fru Knold',options: ['Kong Glimmer','Fru Knold','Millionær-Svend','Hr. Prut','Direktør Boble'] },
+      { key: 'verb2',    label: '🏃 Handling',        hint: 'fx spyttede, skød',       options: ['spyttede','skød','kastede','dryppede','sprøjtede'] },
+      { key: 'mad',      label: '🍕 Mad',             hint: 'fx løgskiver, fiskepinde',options: ['løgskiver','fiskepinde','pandekager','ærter','osteskiver'] },
+      { key: 'verb3',    label: '🏃 Handling (datid)',hint: 'fx skreg, rullede',       options: ['skreg','rullede','trampsede','galopperede','smuttede'] },
+    ],
+    build: (v) => `Jeg ville blive rig! Jeg havde netop opfundet <span class="highlight">${v.ting1}</span>. Med <span class="highlight">${v.ting2}</span> fra <span class="highlight">${v.slægt}</span> værktøjskasse byggede jeg den af <span class="highlight">${v.ting3_pl}</span>. Da jeg tændte for maskinen første gang, "<span class="highlight">${v.lyd}</span>!" råbte jeg og hoppede rundt <span class="highlight">${v.verb1}</span>. Jeg inviterede den <span class="highlight">${v.adj}</span> milliardær <span class="highlight">${v.navn}</span> og kunne ikke vente med at sælge for <span class="highlight">${v.tal}</span> millioner! Men da jeg tændte, gik det frygteligt galt. Maskinen begyndte at <span class="highlight">${v.verb2}</span> <span class="highlight">${v.mad}</span> i alle retninger. Milliardæren <span class="highlight">${v.verb3}</span> ud af mit laboratorium. Godt at jeg stadig får lommepenge. 🤖`,
+  },
+  {
+    title: '🧌 Det store eventyr',
+    fields: [
+      { key: 'dyretype', label: '🐾 Dyretype',        hint: 'fx en giraf, et næsehorn',options: ['en giraf','et næsehorn','en flodhest','en struds','en mammut'] },
+      { key: 'navn1',    label: '👤 Navn',            hint: 'fx Balleby, Guf-Guf',     options: ['Balleby','Guf-Guf','Knold-Erik','Vrumsen','Boble-Bent'] },
+      { key: 'adj1',     label: '✨ Ord',             hint: 'fx kæmpestore, fnuggede', options: ['kæmpestore','fnuggede','blinkende','stinkende','klistrede'] },
+      { key: 'verb1',    label: '🏃 Handling',        hint: 'fx trampe, synge',        options: ['trampe','synge','rulle','hikke','snurre'] },
+      { key: 'noun1',    label: '🎒 Ting',            hint: 'fx en sten, en pøl',      options: ['en sten','en pøl','en bakke','et muddersted','en regnorm'] },
+      { key: 'dyrenavn', label: '🐾 Dyrenavn',        hint: 'fx Rulle, Bøvso',        options: ['Rulle','Bøvso','Gnasker','Trampmand','Sludder'] },
+      { key: 'adj2',     label: '✨ Ord',             hint: 'fx forbløffende, fnugget',options: ['forbløffende','fnugget','klistret','summende','blinkende'] },
+      { key: 'aktivitet',label: '🎮 Aktivitet',       hint: 'fx lasso, hoppebold',     options: ['lasso','hoppebold','klap-klap','rullebold','øjenlukke'] },
+      { key: 'profession',label: '💼 Erhverv',        hint: 'fx skomageren, bonden',   options: ['skomageren','bonden','postbudet','bageren','frisøren'] },
+      { key: 'møbel',    label: '🛋️ Møbel',          hint: 'fx sofaen, en hylde',     options: ['sofaen','en hylde','tæppet','dyngen','garderoben'] },
+      { key: 'mytisk',   label: '🦄 Mytisk væsen',    hint: 'fx en drage, en havfrue', options: ['en drage','en havfrue','en enhjørning','et trold','en havhest'] },
+      { key: 'kropsdel', label: '🦷 Kropsdel',        hint: 'fx poten, halen',         options: ['poten','halen','snuden','ørerne','maven'] },
+      { key: 'noun2',    label: '🎒 Ting',            hint: 'fx smør, lim',            options: ['en pind','smør','lim','mudder','taperuller'] },
+    ],
+    build: (v) => `Der var engang <span class="highlight">${v.dyretype}</span> der hed <span class="highlight">${v.navn1}</span> og som var så <span class="highlight">${v.adj1}</span> at den kunne <span class="highlight">${v.verb1}</span> hele <span class="highlight">${v.noun1}</span>. Dens yndlingsaktivitet var at spille <span class="highlight">${v.aktivitet}</span>. <span class="highlight">${v.navn1}</span> havde et dyr der hed <span class="highlight">${v.dyrenavn}</span> som var så <span class="highlight">${v.adj2}</span> at det kunne <span class="highlight">${v.aktivitet}</span> i timevis. Når de spillede, gemte <span class="highlight">${v.profession}</span> sig under <span class="highlight">${v.møbel}</span>. En dag fandt de <span class="highlight">${v.mytisk}</span> der græd. Dens <span class="highlight">${v.kropsdel}</span> sad fast i <span class="highlight">${v.noun2}</span>! <span class="highlight">${v.dyrenavn}</span> fik en idé: "Lad os smøre mere <span class="highlight">${v.noun2}</span> på!" Det virkede. 🦄`,
+  },
+  {
+    title: '🎪 Jeg er berømt!',
+    fields: [
+      { key: 'mad1',     label: '🍕 Sjov mad',        hint: 'fx leverpostej, ål',      options: ['leverpostej','ål','blæksprutte','rosenkål','sild'] },
+      { key: 'erhverv',  label: '💼 Erhverv',         hint: 'fx regnormsekspert',       options: ['regnormsekspert','professionel snorker','vindmøllereparatør','tændstiksamler','havfruefrisør'] },
+      { key: 'adj',      label: '✨ Ord',             hint: 'fx klistret, fnugget',    options: ['klistret','fnugget','blinkende','summende','stinkende'] },
+      { key: 'sige',     label: '💬 Sætning',         hint: 'fx "Prutte-prutte-bum!"', options: ['"Prutte-prutte-bum!"','"Guf-guf-guf!"','"Bling-bling-bong!"','"Slurp og slurf!"','"Boble-boble-bø!"'] },
+      { key: 'dyr',      label: '🐾 Dyr',             hint: 'fx en snudedyrkrig',      options: ['en snudedyrkrig','et havgrisemonster','en vandhulsheks','en pølsehest','et tørklædetrold'] },
+      { key: 'verb',     label: '🏃 Handling',        hint: 'fx trampe, nynne',        options: ['trampe','nynne','hikke','prutte','snurre'] },
+      { key: 'sted',     label: '📍 Sted',            hint: 'fx Bornholm, månen',      options: ['Bornholm','månen','kloakken','havbunden','en ost'] },
+      { key: 'kendt',    label: '🌟 Berømt person',   hint: 'fx Dronning Margrethe',   options: ['Dronning Margrethe','Bamse','Rasmus Klump','Cirkeline','Morten Munk'] },
+      { key: 'kobt',     label: '🛍️ Hvad man køber', hint: 'fx en ko, 7 paraplyer',   options: ['en ko','7 paraplyer','en kæmpe ost','3 vindmøller','en anden mormor'] },
+      { key: 'ting_pl',  label: '🎒 Ting (flertal)',  hint: 'fx regnorme, pølser',     options: ['regnorme','pølser','gammel ost','søpindsvin','krabbekløer'] },
+    ],
+    build: (v) => `Hej! Mit navn er <span class="highlight">${v.mad1}</span>, men mine venner kalder mig <span class="highlight">${v.adj}</span>. Min yndlingsfarve er farven af <span class="highlight">${v.ting_pl}</span> og min yndlingsaktivitet er at <span class="highlight">${v.verb}</span>. Mine forældre var <span class="highlight">${v.erhverv}</span>-er, og det er derfor vi boede på <span class="highlight">${v.sted}</span>. Du kender mig sikkert fra min TV-reklame for <span class="highlight">${v.kobt}</span>. Det er mig der siger "<span class="highlight">${v.sige}</span>" til sidst! <span class="highlight">${v.kendt}</span> sagde det var den bedste reklame de nogensinde havde set. 🌟`,
   },
 ];
 
